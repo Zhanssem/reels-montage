@@ -14,6 +14,9 @@ const Pop: React.FC<{delay?: number; children: React.ReactNode; style?: React.CS
   return <div style={{transform: tr, opacity: f < delay ? 0 : 1, ...style}}>{children}</div>;
 };
 
+const BlurBg: React.FC<{src: string; start?: number}> = ({src, start = 0}) =>
+  <AbsoluteFill style={{background: '#111'}}><OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(.5)', transform: 'scale(1.15)'}} /></AbsoluteFill>;
+
 const Rays: React.FC = () => {
   const f = useCurrentFrame();
   const rays = Array.from({length: 16}, (_, i) => `${DARK} ${i * 22.5}deg ${i * 22.5 + 11}deg, ${RED} ${i * 22.5 + 11}deg ${(i + 1) * 22.5}deg`).join(',');
@@ -45,12 +48,12 @@ const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
   </div>;
 };
 
-const Phone: React.FC<{src: string; start?: number}> = ({src, start = 0}) => {
+const Phone: React.FC<{src: string; start?: number; bg?: string; bgStart?: number}> = ({src, start = 0, bg = 'pack.mp4', bgStart = 200}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
   const s = spring({frame: f, fps, config: {damping: 13}});
-  return <AbsoluteFill><Rays />
+  return <AbsoluteFill><BlurBg src={bg} start={bgStart} />
     <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center'}}>
-      <div style={{width: 640, height: 1240, borderRadius: 70, border: '18px solid black', overflow: 'hidden', background: 'white', boxShadow: '24px 24px 0 rgba(0,0,0,.35)',
+      <div style={{width: 640, height: 1240, borderRadius: 70, border: '14px solid #111', overflow: 'hidden', background: 'white', boxShadow: '0 40px 90px rgba(0,0,0,.55)',
         transform: `translateY(${(1 - s) * 1400}px) rotate(${(1 - s) * 18 + Math.sin(f / 25) * 2}deg)`}}>
         <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
       </div>
@@ -99,17 +102,17 @@ const Stats: React.FC = () => {
     </AbsoluteFill></AbsoluteFill>;
 };
 
-const Final: React.FC = () => <AbsoluteFill><Rays />
+const Final: React.FC = () => <AbsoluteFill><BlurBg src="alt.mp4" start={300} />
   <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', gap: 50, padding: 80}}>
-    <Pop><div style={{fontFamily: U, fontWeight: 900, fontSize: 220, color: 'white', lineHeight: .9, textAlign: 'center', WebkitTextStroke: '10px black', paintOrder: 'stroke fill', textShadow: `0 18px 0 ${DARK}`}}>TEZ<br />TAP!</div></Pop>
-    <Pop delay={10} from="up"><Big size={92} color={YEL}>енді онлайн</Big></Pop>
-    <Pop delay={22} from="up"><div style={{fontFamily: C, fontSize: 84, color: 'white', textAlign: 'center'}}>Үздік сұрақтар — сіздің экраныңызда</div></Pop>
-    <Pop delay={34}><div style={{background: 'white', border: '5px solid black', borderRadius: 60, padding: '20px 50px', fontFamily: U, fontWeight: 600, fontSize: 52}}>play.teztap.company</div></Pop>
+    <Pop><div style={{fontFamily: U, fontWeight: 900, fontSize: 200, color: 'white', lineHeight: .9, textAlign: 'center', letterSpacing: -4}}>TEZTAP</div></Pop>
+    <Pop delay={10} from="up"><div style={{background: RED, color: 'white', fontFamily: U, fontWeight: 800, fontSize: 84, padding: '14px 44px', borderRadius: 24, textTransform: 'uppercase'}}>енді онлайн</div></Pop>
+    <Pop delay={22} from="up"><div style={{fontFamily: U, fontWeight: 600, fontSize: 52, color: 'white', textAlign: 'center', maxWidth: 850}}>Үздік сұрақтар — сіздің экраныңызда</div></Pop>
+    <Pop delay={34}><div style={{background: 'white', borderRadius: 60, padding: '20px 50px', fontFamily: U, fontWeight: 600, fontSize: 52}}>play.teztap.company</div></Pop>
   </AbsoluteFill></AbsoluteFill>;
 
 const Hook: React.FC = () => <AbsoluteFill>
   <Sequence durationInFrames={75}><Zoom dur={75}><OffthreadVideo src={staticFile('hall.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.6)'}} /></Zoom></Sequence>
-  <Sequence from={75}><Phone src="site.mp4" /></Sequence>
+  <Sequence from={75}><Phone src="site.mp4" bg="hall.mp4" bgStart={0} /></Sequence>
   <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', paddingTop: 300, gap: 24}}>
     <Pop delay={4} from="up"><Big size={70}>Бізден жиі сұрайтын:</Big></Pop>
     <Pop delay={20}><div style={{background: 'white', border: '6px solid black', borderRadius: 40, padding: '28px 40px', boxShadow: '12px 12px 0 black', maxWidth: 900,
