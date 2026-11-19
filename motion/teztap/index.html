@@ -1,14 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Caveat:wght@700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<style>@font-face{font-family:DW;src:url(a/fonts/DrukWide.ttf)}@font-face{font-family:DS;src:url(a/fonts/DrukSuper.ttf)}@font-face{font-family:DI;src:url(a/fonts/DrukItalic.ttf)}@font-face{font-family:DT;src:url(a/fonts/DrukText.ttf)}</style>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;overflow:hidden;background:#ED1C24}
 #s{position:relative;width:1080px;height:1920px;overflow:hidden;background:#ED1C24}
 .a{position:absolute;left:0;top:0;will-change:transform,opacity}
-.U{font-family:Unbounded;font-weight:900;color:#fff;text-transform:uppercase}
+.U{font-family:DW;color:#fff;text-transform:uppercase}
 .stk{text-shadow:0 4px 0 #000,0 8px 0 #fff,0 10px 0 #000,0 14px 0 #fff,0 16px 0 #000,-3px 0 0 #000,3px 0 0 #000,0 -3px 0 #000}
-.cap{width:1080px;text-align:center;font:900 76px/1.08 Unbounded;color:#fff;text-transform:uppercase;text-shadow:0 5px 0 #C82127,0 10px 0 #8d1218}
-.hand{font-family:Caveat;font-weight:700;color:#fff}
+.cap{width:1080px;text-align:center;font:400 60px/1.15 DW;color:#fff;text-transform:uppercase;text-shadow:0 5px 0 #C82127,0 10px 0 #8d1218}
+.hand{font-family:DI;font-weight:400;text-transform:uppercase;color:#fff}
 #scr{position:absolute;left:24px;top:24px;width:600px;height:1300px;border-radius:64px;overflow:hidden;background:#fff}
 </style></head><body><div id="s">
 <div class="a" id="rays" style="left:-900px;top:-500px;width:2880px;height:2880px;border-radius:50%;background:repeating-conic-gradient(#ED1C24 0 7.5deg,#d9161e 7.5deg 15deg)"></div>
@@ -27,23 +27,23 @@ const win=(t,a,b,fi=.3,fo=.3)=>Math.min(eo(p(t,a,a+fi)),1-eio(p(t,b-fo,b)));
 const set=(e,x,y,s=1,o=1,r=0,sx=1,sy=1)=>{e.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${s*sx},${s*sy})`;e.style.opacity=o;e.style.visibility=o<=0.001?'hidden':'visible'};
 const $=id=>document.getElementById(id);
 // floating doodles
-const doodles=['?','★','⚡','!','?','★','!','⚡','?','★'].map((c,i)=>{const d=el(`<div style="font:700 ${70+(i%3)*30}px Caveat;color:#fff;opacity:.35">${c}</div>`);d.k=i;return d});
+const doodles=['?','★','⚡','!','?','★','!','⚡','?','★'].map((c,i)=>{const d=el(`<div style="font:400 ${70+(i%3)*30}px DI;color:#fff;opacity:.35">${c}</div>`);d.k=i;return d});
 // SCENE 1 Сүйінші
-const s1=el(`<div class="U stk" style="width:1080px;text-align:center;font-size:150px;letter-spacing:-4px">СҮЙІНШІ!</div>`);
+const s1=el(`<div class="U stk" style="width:1080px;text-align:center;font-family:DS;font-size:300px;letter-spacing:0">СҮЙІНШІ!</div>`);
 // SCENE 2 countdown
 const ring=el(`<svg width="560" height="560" viewBox="0 0 560 560"><circle cx="280" cy="280" r="250" fill="none" stroke="#fff" stroke-width="10"/><circle id="rg" cx="280" cy="280" r="250" fill="none" stroke="#E1E31A" stroke-width="22" stroke-linecap="round" stroke-dasharray="1571" transform="rotate(-90 280 280)"/></svg>`);
-const nums=[3,2,1].map(n=>el(`<div class="U stk" style="width:560px;text-align:center;font-size:400px;line-height:560px">${n}</div>`));
-const s2t=el(`<div class="hand" style="width:1080px;text-align:center;font-size:84px">асыға күткен күн келді!</div>`);
+const nums=[3,2,1].map(n=>el(`<div class="U stk" style="width:560px;text-align:center;font-family:DS;font-size:470px;line-height:600px">${n}</div>`));
+const s2t=el(`<div class="hand" style="width:1080px;text-align:center;font-size:70px">асыға күткен күн келді!</div>`);
 // confetti
 const conf=[...Array(70)].map((_,i)=>{const c=el(`<div style="width:${14+i%3*6}px;height:${24+i%4*6}px;background:${['#E1E31A','#fff','#C82127','#E1E31A'][i%4]};border-radius:3px"></div>`);c.r=[Math.random(),Math.random(),Math.random(),Math.random()];return c});
 // SCENE 3 logo
 const logo=el(`<img src="a/logo.png" style="width:560px">`);
-const onl=el(`<div class="U" style="padding:22px 50px;background:#E1E31A;color:#000;font-size:72px;border:5px solid #000;border-radius:24px;box-shadow:0 10px 0 #000">ЕНДІ ОНЛАЙН!</div>`);
+const onl=el(`<div class="U" style="padding:22px 50px;background:#E1E31A;color:#000;font-size:54px;border:5px solid #000;border-radius:24px;box-shadow:0 10px 0 #000">ЕНДІ ОНЛАЙН!</div>`);
 // PHONE
 const phone=el(`<div style="width:648px;height:1348px;border-radius:88px;background:#111;box-shadow:0 0 0 6px #000,0 50px 0 -10px #8d1218,0 60px 120px #0006;position:relative">
 <div id="scr">
  <div id="bar" style="position:absolute;left:0;top:0;width:600px;height:150px;background:#f2f2f2;z-index:5;padding:62px 22px 0">
-  <div style="height:70px;border-radius:35px;background:#fff;border:3px solid #ddd;display:flex;align-items:center;padding:0 26px;font:800 30px Manrope;color:#222;gap:12px"><span style="font-size:28px">🔒</span><span id="url"></span><span id="caret" style="width:3px;height:36px;background:#ED1C24"></span></div></div>
+  <div style="height:70px;border-radius:35px;background:#fff;border:3px solid #ddd;display:flex;align-items:center;padding:0 26px;font:400 24px DT;color:#222;gap:12px"><span style="font-size:28px">🔒</span><span id="url"></span><span id="caret" style="width:3px;height:36px;background:#ED1C24"></span></div></div>
  <div id="pg" style="position:absolute;left:0;top:150px;width:600px;height:1150px;overflow:hidden">
   <img id="ihome" src="a/home.png" class="a" style="width:600px">
   <img id="ipkg" src="a/pkg.png" class="a" style="width:600px">
@@ -53,7 +53,7 @@ const phone=el(`<div style="width:648px;height:1348px;border-radius:88px;backgro
  </div>
  <div id="land" class="a" style="width:1300px;height:600px;background:#111;transform-origin:0 0">
   <img id="L1" src="a/L1.png" class="a" style="width:1300px"><img id="L2" src="a/L2.png" class="a" style="width:1300px"><img id="L3" src="a/L3.png" class="a" style="width:1300px"><img id="L4" src="a/L4.png" class="a" style="width:1300px">
-  <div id="tmr" class="a" style="left:0;top:0;font:900 44px Unbounded;color:#fff"></div>
+  <div id="tmr" class="a" style="left:0;top:0;font:400 44px DW;color:#fff"></div>
  </div>
 </div>
 <div style="position:absolute;left:244px;top:40px;width:160px;height:44px;border-radius:22px;background:#111;z-index:9"></div>
@@ -70,21 +70,21 @@ mk('c3','ЭКРАНДЫ ҚОС —<br><span style="color:#E1E31A">ОЙНА!</spa
 mk('c4','ҮШ-АҚ <span style="color:#E1E31A">ҚАДАМ</span>');
 // globe pins
 const cities=['Алматы','Астана','Шымкент','Стамбул','Сеул','Дубай','Лондон','Нью-Йорк'];
-const pins=cities.map((c,i)=>el(`<div style="display:flex;align-items:center;gap:12px;padding:14px 26px 14px 16px;background:#fff;border:4px solid #000;border-radius:40px;box-shadow:0 8px 0 #000;font:800 36px Manrope;color:#000"><span style="width:30px;height:30px;border-radius:50%;background:#ED1C24;border:4px solid #000"></span>${c}</div>`));
+const pins=cities.map((c,i)=>el(`<div style="display:flex;align-items:center;gap:12px;padding:14px 26px 14px 16px;background:#fff;border:4px solid #000;border-radius:40px;box-shadow:0 8px 0 #000;font:400 30px DT;color:#000"><span style="width:30px;height:30px;border-radius:50%;background:#ED1C24;border:4px solid #000"></span>${c}</div>`));
 // steps
-const steps=['ТАҢДАЙСЫЗ','ТӨЛЕЙСІЗ','ОЙНАЙСЫЗ'].map((t,i)=>el(`<div style="display:flex;align-items:center;gap:22px"><div style="width:96px;height:96px;border-radius:50%;background:#E1E31A;border:5px solid #000;font:900 54px/86px Unbounded;text-align:center;color:#000;box-shadow:0 7px 0 #000">${i+1}</div><div class="U" style="font-size:54px;text-shadow:0 5px 0 #8d1218">${t}</div></div>`));
+const steps=['ТАҢДАЙСЫЗ','ТӨЛЕЙСІЗ','ОЙНАЙСЫЗ'].map((t,i)=>el(`<div style="display:flex;align-items:center;gap:22px"><div style="width:96px;height:96px;border-radius:50%;background:#E1E31A;border:5px solid #000;font:400 60px/86px DS;text-align:center;color:#000;box-shadow:0 7px 0 #000">${i+1}</div><div class="U" style="font-size:46px;text-shadow:0 5px 0 #8d1218">${t}</div></div>`));
 // paid features callouts
-const feats=[['♾️','7 КҮН ШЕКСІЗ'],['📺','КЕЗ КЕЛГЕН ЭКРАН'],['🇰🇿','ҚАЗАҚ ТІЛІНДЕ']].map(([i,t])=>el(`<div style="display:flex;align-items:center;gap:16px;padding:18px 30px 18px 18px;background:#fff;border:5px solid #000;border-radius:30px;box-shadow:0 9px 0 #000"><span style="font-size:52px">${i}</span><span style="font:900 36px Unbounded;color:#000">${t}</span></div>`));
+const feats=[['♾️','7 КҮН ШЕКСІЗ'],['📺','КЕЗ КЕЛГЕН ЭКРАН'],['🇰🇿','ҚАЗАҚ ТІЛІНДЕ']].map(([i,t])=>el(`<div style="display:flex;align-items:center;gap:16px;padding:18px 30px 18px 18px;background:#fff;border:5px solid #000;border-radius:30px;box-shadow:0 9px 0 #000"><span style="font-size:52px">${i}</span><span style="font:400 30px DW;color:#000">${t}</span></div>`));
 // gift
 const gift=el(`<div style="width:1080px;text-align:center"><div style="font-size:220px;line-height:1">🎁</div><div class="cap" style="margin-top:10px">АЛҒАШҚЫ ОЙЫН<br><span style="display:inline-block;margin-top:16px;padding:8px 40px;background:#E1E31A;color:#000;border:6px solid #000;border-radius:30px;text-shadow:none;box-shadow:0 10px 0 #000">ТЕГІН!</span></div></div>`);
 // big url bar
-const big=el(`<div style="width:960px;height:170px;border-radius:85px;background:#fff;border:7px solid #000;box-shadow:0 16px 0 #000;display:flex;align-items:center;padding:0 50px;gap:22px;font:800 58px Manrope;color:#000"><span style="font-size:54px">🔒</span><span id="burl"></span><span id="bcar" style="width:5px;height:70px;background:#ED1C24"></span></div>`);
-const go=el(`<div style="padding:34px 90px;border-radius:60px;background:#E1E31A;border:6px solid #000;box-shadow:0 12px 0 #000;font:900 64px Unbounded;color:#000">▶ ОЙНАУ</div>`);
-const bug=el(`<div class="hand" style="width:1080px;text-align:center;font-size:96px">бүгін-ақ бастаңыз!</div>`);
+const big=el(`<div style="width:960px;height:170px;border-radius:85px;background:#fff;border:7px solid #000;box-shadow:0 16px 0 #000;display:flex;align-items:center;padding:0 50px;gap:22px;font:400 46px DT;color:#000"><span style="font-size:54px">🔒</span><span id="burl"></span><span id="bcar" style="width:5px;height:70px;background:#ED1C24"></span></div>`);
+const go=el(`<div style="padding:34px 90px;border-radius:60px;background:#E1E31A;border:6px solid #000;box-shadow:0 12px 0 #000;font:400 58px DW;color:#000">▶ ОЙНАУ</div>`);
+const bug=el(`<div class="hand" style="width:1080px;text-align:center;font-size:76px">бүгін-ақ бастаңыз!</div>`);
 // final
 const flogo=el(`<img src="a/logo.png" style="width:520px">`);
-const slog=el(`<div class="cap" style="font-size:70px">АҚЫЛ ӘЛЕМДІ<br>ҚҰТҚАРАДЫ</div>`);
-const furl=el(`<div style="width:1080px;text-align:center;font:800 50px Manrope;color:#fff">play.teztap.company</div>`);
+const slog=el(`<div class="cap" style="font-size:58px">АҚЫЛ ӘЛЕМДІ<br>ҚҰТҚАРАДЫ</div>`);
+const furl=el(`<div style="width:1080px;text-align:center;font:400 40px DT;color:#fff">play.teztap.company</div>`);
 const flash=el(`<div style="width:1080px;height:1920px;background:#fff"></div>`);
 
 const URL='play.teztap.company';
@@ -113,7 +113,7 @@ window.render=t=>{
  // S3 logo 3.4-5.4
  const lk=elas(p(t,3.45,4.25)),lo=1-eio(p(t,5.2,5.5));
  set(logo,260,(1-lk)*-900+380,1,t>3.4?lo:0,(1-cl(lk))*-10,1+.08*Math.sin(p(t,3.9,4.1)*Math.PI),1-.1*Math.sin(p(t,3.9,4.1)*Math.PI));
- const ok=back(p(t,4.1,4.4));set(onl,230,1120,ok*(1+.04*Math.sin(t*9)),t>4.1?lo:0,-4);
+ const ok=back(p(t,4.1,4.4));set(onl,170,1120,ok*(1+.04*Math.sin(t*9)),t>4.1?lo:0,-4);
  // PHONE: in 5.3, out etc.
  let px=216,py=380,ps=.86,pr=0,po=0;
  if(t>5.3){po=1;const k=eo(p(t,5.3,5.9));py=470+(1-k)*1500;pr=(1-k)*10;}
