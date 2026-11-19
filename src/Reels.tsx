@@ -7,21 +7,25 @@ const T = data.timeline; const seg = (i: number) => T[i];
 const D = 'DrukCond', DT = 'DrukText', SF = 'SF';
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
-// Line reveal: slides up from a mask with motion blur
+// Headline: per-letter drop-in with blur, CAPS
 const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; color?: string; font?: string; out?: number}> = ({children, delay = 0, size, color = WHITE, font = D, out}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
-  const s = spring({frame: f - delay, fps, config: {damping: 18, stiffness: 190}});
-  const o = out !== undefined ? interpolate(f, [out, out + 6], [0, 1], clamp) : 0;
-  const blur = Math.abs(1 - s) * 18 + o * 14;
-  return <div style={{overflow: 'hidden', padding: '0.08em 10px 0.02em', lineHeight: 0.92, marginTop: '-0.06em'}}>
-    <div style={{fontFamily: font, fontSize: size, color, textTransform: 'uppercase', textAlign: 'center', letterSpacing: font === D ? 1 : 0,
-      transform: `translateY(${(1 - s) * 100 + o * -60}%)`, filter: `blur(${blur}px)`, opacity: f < delay ? 0 : 1 - o,
-      textShadow: '0 6px 30px rgba(0,0,0,.45)'}}>{children}</div></div>;
+  const o = out !== undefined ? interpolate(f, [out, out + 7], [0, 1], clamp) : 0;
+  const text = String(children); const isSmall = font === SF;
+  const chars = Array.from(text);
+  return <div style={{lineHeight: 0.92, padding: '0.06em 10px 0', whiteSpace: 'nowrap', textAlign: 'center', opacity: 1 - o, filter: `blur(${o * 12}px)`, transform: `scale(${1 + o * 0.06})`}}>
+    {chars.map((ch, i) => { const d = delay + i * (isSmall ? 0.6 : 1.6);
+      const s = spring({frame: f - d, fps, config: {damping: 14, stiffness: 210}});
+      return <span key={i} style={{display: 'inline-block', fontFamily: font, fontWeight: isSmall ? 500 : 400, fontSize: size, color, textTransform: isSmall ? 'none' : 'uppercase',
+        transform: `translateY(${(1 - s) * -0.55}em) scale(${0.6 + 0.4 * s})`, filter: `blur(${(1 - s) * 10}px)`, opacity: f < d ? 0 : Math.min(1, s * 1.4),
+        textShadow: '0 6px 30px rgba(0,0,0,.5)', whiteSpace: 'pre'}}>{ch}</span>; })}
+  </div>;
 };
 
-const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 560, step = 6, out}) =>
+// lines: [text, size, 'r' red | 'k' small SF kicker]
+const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 560, step = 8, out}) =>
   <AbsoluteFill style={{alignItems: 'center', paddingTop: top}}>
-    {lines.map(([t, s, c], i) => <Line key={i} size={s} color={c === 'r' ? RED : WHITE} delay={i * step} out={out}>{t}</Line>)}
+    {lines.map(([t, s, c], i) => <Line key={i} size={c === 'k' ? 52 : s} font={c === 'k' ? SF : D} color={c === 'r' ? RED : WHITE} delay={i * step} out={out}>{t}</Line>)}
   </AbsoluteFill>;
 
 const BW: React.FC<{dur: number}> = ({dur}) => null;
@@ -90,9 +94,9 @@ const Captions: React.FC<{hide: [number, number][]; accent: string[]}> = ({hide,
   const c = caps[idx]; const l = f - c[0];
   const w = c[2].replace(/[.,!?—«»]/g, '');
   if (!w) return null;
-  const isA = accent.some(a => w.toLowerCase().startsWith(a));
+  const isA = false;
   return <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 640}}>
-    <div style={{fontFamily: isA ? D : SF, fontWeight: 600, fontSize: isA ? 150 : 64, color: isA ? RED : WHITE, textTransform: isA ? 'uppercase' : 'none',
+    <div style={{fontFamily: isA ? D : SF, fontWeight: 600, fontSize: isA ? 150 : 60, color: isA ? RED : WHITE, textTransform: isA ? 'uppercase' : 'none',
       transform: `scale(${interpolate(l, [0, 4], [1.25, 1], clamp)}) translateY(${interpolate(l, [0, 4], [12, 0], clamp)}px)`, filter: `blur(${interpolate(l, [0, 3], [8, 0], clamp)}px)`,
       textShadow: '0 4px 18px rgba(0,0,0,.7)'}}>{w}</div></AbsoluteFill>;
 };
@@ -106,7 +110,7 @@ const Counter: React.FC<{to: number; delay: number; label: string; red?: boolean
 };
 
 const Stats: React.FC = () => <AbsoluteFill>
-  <OffthreadVideo src={staticFile('px_6955192.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.45)'}} />
+  <OffthreadVideo src={staticFile('px_7334485.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.45)'}} />
   <AbsoluteFill style={{justifyContent: 'center', gap: 10}}>
     <Counter to={7} delay={0} label="ай" /><Counter to={3} delay={22} label="қала" red /><Counter to={10} delay={44} label="пакет" />
   </AbsoluteFill></AbsoluteFill>;
@@ -115,7 +119,7 @@ const Final: React.FC = () => {
   const f = useCurrentFrame();
   return <AbsoluteFill>
     <OffthreadVideo src={staticFile('amanat.mp4')} muted startFrom={950} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(18px) brightness(.4)'}} />
-    <Stack top={620} lines={[['TEZTAP', 300], ['енді онлайн', 170, 'r']]} step={8} />
+    <Stack top={620} lines={[['енді', 0, 'k'], ['TEZTAP', 300], ['ОНЛАЙН', 220, 'r']]} step={10} />
     <AbsoluteFill style={{alignItems: 'center', paddingTop: 1160, gap: 34, opacity: interpolate(f, [24, 34], [0, 1], clamp), filter: `blur(${interpolate(f, [24, 32], [10, 0], clamp)}px)`}}>
       <div style={{fontFamily: SF, fontWeight: 500, fontSize: 50, color: WHITE, textAlign: 'center', maxWidth: 820}}>Үздік сұрақтар — сіздің экраныңызда</div>
       <div style={{fontFamily: SF, fontWeight: 600, fontSize: 46, color: WHITE, background: RED, padding: '14px 40px', borderRadius: 50}}>play.teztap.company</div>
@@ -125,13 +129,13 @@ const Final: React.FC = () => {
 const Hook: React.FC = () => <AbsoluteFill>
   <Sequence durationInFrames={75}><BRoll src="px_8058006.mp4" dur={75} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /></Sequence>
   <Sequence from={75}><Phone src="site.mp4" bg="px_8058006.mp4" bgStart={60} /></Sequence>
-  <Sequence durationInFrames={75}><Stack top={640} lines={[['Бізден жиі', 120], ['сұрайтын', 120], ['сұрақтарыңызды', 130, 'r'], ['сатасыздар ма?', 130, 'r']]} step={7} out={66} /></Sequence>
-  <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 140}}><Line size={130}>енді — иә!</Line><Line size={130} color={RED} delay={6}>онлайн</Line></AbsoluteFill></Sequence>
+  <Sequence durationInFrames={75}><Stack top={640} lines={[['бізден жиі сұрайтын:', 0, 'k'], ['СҰРАҚТАРЫҢЫЗДЫ', 150], ['САТАСЫЗДАР МА?', 165, 'r']]} step={9} out={66} /></Sequence>
+  <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 140}}><Line size={52} font={SF}>енді — иә!</Line><Line size={170} color={RED} delay={8}>ОНЛАЙН</Line></AbsoluteFill></Sequence>
 </AbsoluteFill>;
 
 const DanaQ: React.FC = () => <AbsoluteFill>
   <BRoll src="px_12893579.mp4" dur={84} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} />
-  <Stack top={620} lines={[['Сөйтсем, ол', 130], ['IT-маман', 240, 'r'], ['болып шықты', 130]]} step={8} />
+  <Stack top={620} lines={[['сөйтсем, ол', 0, 'k'], ['IT-МАМАН', 270, 'r'], ['болып шықты', 0, 'k']]} step={10} />
 </AbsoluteFill>;
 
 export const Reels: React.FC = () => {
@@ -141,10 +145,10 @@ export const Reels: React.FC = () => {
   const L = (s: typeof T[0], sec: number) => Math.round(sec * 30) - s.in; // local frame within speaker seq
   // big title moments over speakers (absolute frames) — captions hidden there
   const titles: {from: number; dur: number; lines: [string, number, string?][]}[] = [
-    {from: at(18.6, a2), dur: 50, lines: [['Атырау', 260, 'r']]},
-    {from: at(24.2, a2), dur: 60, lines: [['мамыр', 200], ['2026', 260, 'r']]},
-    {from: at(7.5, m1), dur: 40, lines: [['қуандым', 220, 'r']]},
-    {from: at(30.45, m3), dur: 34, lines: [['тек қана', 150], ['қуаныш', 230, 'r']]},
+    {from: at(18.6, a2), dur: 50, lines: [['біздің қала', 0, 'k'], ['АТЫРАУ', 280, 'r']]},
+    {from: at(24.2, a2), dur: 60, lines: [['бастадық', 0, 'k'], ['МАМЫР', 230], ['2026', 260, 'r']]},
+    {from: at(7.5, m1), dur: 40, lines: [['әрине', 0, 'k'], ['ҚУАНДЫМ', 240, 'r']]},
+    {from: at(30.45, m3), dur: 34, lines: [['тек қана', 0, 'k'], ['ҚУАНЫШ', 250, 'r']]},
   ];
   const hide: [number, number][] = [[0, a1.from], [seg(2).from, seg(2).from + seg(2).dur], [seg(7).from, 99999], ...titles.map(t => [t.from, t.from + t.dur] as [number, number]),
     [at(0.6, a1) + 54, at(0.6, a1) + 54], [f39, a2.from + a2.dur], [m2.from, m2.from + m2.dur]];
@@ -157,17 +161,17 @@ export const Reels: React.FC = () => {
     <Sequence from={m3.from} durationInFrames={m3.dur}><Speaker src="amanat.mp4" i={m3.in} dur={m3.dur} punch={[L(m3, 32.1)]} bw={[[0, 48]]} /><Audio src={staticFile('amanat_clean.wav')} startFrom={m3.in} /></Sequence>
     <Sequence from={seg(2).from} durationInFrames={seg(2).dur}><DanaQ /></Sequence>
     {/* B-roll */}
-    <Sequence from={at(2.4, a1)} durationInFrames={130}><Sequence durationInFrames={65}><BRoll src="px_3189291.mp4" dur={65} /></Sequence><Sequence from={65}><BRoll src="players.png" img dur={65} /></Sequence><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
-      <Stack top={300} lines={[['Астана', 170], ['Алматы', 170, 'r']]} /></Sequence>
+    <Sequence from={at(2.4, a1)} durationInFrames={130}><Sequence durationInFrames={65}><BRoll src="px_3256852.mp4" dur={65} /></Sequence><Sequence from={65}><BRoll src="px_5847919.mp4" dur={65} /></Sequence><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
+      <Stack top={300} lines={[['біз ойнайтынбыз', 0, 'k'], ['АСТАНА', 190], ['АЛМАТЫ', 190, 'r']]} /></Sequence>
     <Sequence from={at(17.6, a2)} durationInFrames={95}><BRoll src="office.mp4" start={60} dur={95} /></Sequence>
     <Sequence from={at(26.6, a2)} durationInFrames={at(29.3, a2) - at(26.6, a2)}><BRoll src="px_7989667.mp4" dur={80} /></Sequence>
     <Sequence from={f39} durationInFrames={a2.from + a2.dur - f39}>
       <Freeze frame={Math.round(30.15 * 30)}><OffthreadVideo src={staticFile('alt.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.6)', transform: 'scale(1.15)'}} /></Freeze>
-      <Stack top={560} lines={[['39', 520, 'r'], ['ойын', 170]]} step={7} /></Sequence>
+      <Stack top={560} lines={[['кеше өткіздік', 0, 'k'], ['39', 520, 'r'], ['ОЙЫН', 170]]} step={8} /></Sequence>
     <Sequence from={at(10.0, m1)} durationInFrames={50}><BRoll src="px_6646796.mp4" dur={50} /></Sequence>
     <Sequence from={at(10.0, m1) + 50} durationInFrames={m1.from + m1.dur - at(10.0, m1) - 50}><BRoll src="pack.mp4" start={190} dur={70} /></Sequence>
     <Sequence from={m2.from} durationInFrames={m2.dur}><Phone src="site.mp4" start={120} bg="amanat.mp4" bgStart={520} />
-      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={140}>қазақ</Line><Line size={140} color={RED} delay={6}>тілінде</Line></AbsoluteFill></Sequence>
+      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={52} font={SF}>енді</Line><Line size={150} delay={8}>ҚАЗАҚ</Line><Line size={150} color={RED} delay={16}>ТІЛІНДЕ</Line></AbsoluteFill></Sequence>
     <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="px_8451937.mp4" dur={45} /></Sequence>
     <Sequence from={at(31.6, m3)} durationInFrames={at(33.0, m3) - at(31.6, m3)}><SiteCards bg="amanat.mp4" bgStart={950} /></Sequence>
     {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={600} lines={t.lines} out={t.dur - 7} /></Sequence>)}
