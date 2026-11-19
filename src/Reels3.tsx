@@ -111,7 +111,6 @@ export const Reels3: React.FC = () => {
         <Audio src={staticFile(SRC[s.src!].a)} startFrom={s.in!} /></Sequence>
       : s.type === 'q' ? <Sequence key={i} from={s.from} durationInFrames={s.dur}><Question s={s} n={(i >> 1) + 1} /></Sequence>
       : <Sequence key={i} from={s.from} durationInFrames={s.dur}><FinalCard /></Sequence>)}
-    {titles.map((t, k) => <Sequence key={'t' + k} from={t.from} durationInFrames={t.dur}><Stack top={300} lines={t.lines} out={t.dur - 7} /></Sequence>)}
     <Sequence from={s1.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Sequence from={s2.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
     <Captions hide={hide} />
@@ -121,7 +120,10 @@ export const Reels3: React.FC = () => {
 const FinalCard: React.FC = () => { const f = useCurrentFrame();
   return <AbsoluteFill>
     <OffthreadVideo src={staticFile('pack.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(18px) brightness(.4)'}} />
-    <Stack top={620} lines={[['енді', 0, 'k'], ['TEZTAP', 300], ['ОНЛАЙН', 220, 'r']]} step={10} />
+    <AbsoluteFill style={{alignItems: 'center', paddingTop: 620, opacity: interpolate(f, [0, 12], [0, 1], clamp)}}>
+      <div style={{fontFamily: SF, fontWeight: 500, fontSize: 52, color: WHITE}}>енді</div>
+      <div style={{fontFamily: D, fontSize: 300, lineHeight: .9, color: WHITE}}>TEZTAP</div>
+      <div style={{fontFamily: D, fontSize: 220, lineHeight: .9, color: RED}}>ОНЛАЙН</div></AbsoluteFill>
     <AbsoluteFill style={{alignItems: 'center', paddingTop: 1180, gap: 30, opacity: interpolate(f, [24, 34], [0, 1], clamp)}}>
       <div style={{fontFamily: SF, fontWeight: 500, fontSize: 50, color: WHITE, textAlign: 'center', maxWidth: 820}}>Үздік сұрақтар — сіздің экраныңызда</div>
       <div style={{fontFamily: SF, fontWeight: 600, fontSize: 46, color: WHITE, background: RED, padding: '14px 40px', borderRadius: 50}}>play.teztap.company</div>
