@@ -74,13 +74,16 @@ const SiteCards: React.FC<{bg: string; bgStart?: number}> = ({bg, bgStart = 0}) 
     </AbsoluteFill></AbsoluteFill>;
 };
 
+const Flash: React.FC = () => { const f = useCurrentFrame();
+  return <AbsoluteFill style={{background: 'white', opacity: interpolate(f, [0, 1, 4], [0, 0.85, 0], clamp), pointerEvents: 'none'}} />; };
+
 const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
   const f = useCurrentFrame();
   const o = interpolate(f, [80, 90], [1, 0], clamp);
   return <AbsoluteFill style={{alignItems: 'flex-start', paddingTop: 300, paddingLeft: 70, opacity: o}}>
     <Line size={110} font={D}>{name}</Line>
     <div style={{marginLeft: 10, marginTop: 8, opacity: interpolate(f, [6, 12], [0, 1], clamp), transform: `translateX(${interpolate(f, [6, 14], [-30, 0], clamp)}px)`}}>
-      <span style={{background: RED, color: WHITE, fontFamily: SF, fontWeight: 600, fontSize: 38, padding: '8px 22px', borderRadius: 40}}>{role}</span></div>
+      <span style={{background: RED, color: WHITE, fontFamily: SF, fontWeight: 600, fontSize: 58, padding: '10px 30px', borderRadius: 50}}>{role}</span></div>
   </AbsoluteFill>;
 };
 
@@ -171,14 +174,16 @@ export const Reels: React.FC = () => {
     <Sequence from={at(10.0, m1)} durationInFrames={50}><BRoll src="px_6646796.mp4" dur={50} /></Sequence>
     <Sequence from={at(10.0, m1) + 50} durationInFrames={m1.from + m1.dur - at(10.0, m1) - 50}><BRoll src="pack.mp4" start={190} dur={70} /></Sequence>
     <Sequence from={m2.from} durationInFrames={m2.dur}><Phone src="site.mp4" start={120} bg="amanat.mp4" bgStart={520} />
-      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={52} font={SF}>енді</Line><Line size={150} delay={8}>ҚАЗАҚ</Line><Line size={150} color={RED} delay={16}>ТІЛІНДЕ</Line></AbsoluteFill></Sequence>
+      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={52} font={SF}>енді</Line><div style={{display: 'flex', gap: 24}}><Line size={130} delay={8}>ҚАЗАҚ</Line><Line size={130} color={RED} delay={16}>ТІЛІНДЕ</Line></div></AbsoluteFill></Sequence>
     <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="px_8451937.mp4" dur={45} /></Sequence>
-    <Sequence from={at(31.6, m3)} durationInFrames={at(33.0, m3) - at(31.6, m3)}><SiteCards bg="amanat.mp4" bgStart={950} /></Sequence>
+    <Sequence from={at(31.6, m3)} durationInFrames={at(33.0, m3) - at(31.6, m3)}><BRoll src="px_8058014.mp4" dur={42} /></Sequence>
     {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={600} lines={t.lines} out={t.dur - 7} /></Sequence>)}
     <Sequence from={a1.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Sequence from={m1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
     <Captions hide={hide} accent={['платформ', 'онлайн', 'teztap']} />
     <Sequence from={seg(7).from} durationInFrames={seg(7).dur}><Stats /></Sequence>
+    {[seg(0).from + 75, a1.from, at(2.4, a1), at(2.4, a1) + 65, at(2.4, a1) + 130, seg(2).from, a2.from, at(17.6, a2), at(26.6, a2), f39, m1.from, at(10.0, m1), at(10.0, m1) + 50, m2.from, m3.from, at(31.6, m3), at(33.0, m3), seg(7).from, seg(8).from]
+      .map((fr, k) => <Sequence key={'fl' + k} from={fr - 1} durationInFrames={5}><Flash /></Sequence>)}
     <Sequence from={seg(8).from} durationInFrames={seg(8).dur}><Final /></Sequence>
   </AbsoluteFill>;
 };
