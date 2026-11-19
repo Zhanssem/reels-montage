@@ -15,13 +15,13 @@ const wordAt = (prefix: string, after = 0) => (CAPS.find(c => c[0] >= after && c
 const Question: React.FC<{s: Seg; n: number}> = ({s, n}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
   const words = s.text!.split(' ');
-  const out = interpolate(f, [s.dur - 7, s.dur], [0, 1], clamp);
+  const out = interpolate(f, [s.dur - 14, s.dur], [0, 1], {...clamp, easing: ease});
   return <AbsoluteFill>
-    <Freeze frame={Math.round(s.at! * 30)}><OffthreadVideo src={staticFile(SRC[s.src!].v)} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: `grayscale(1) blur(${interpolate(f, [0, 8], [6, 26], clamp)}px) brightness(.45)`, transform: 'scale(1.15)'}} /></Freeze>
-    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', padding: '0 80px', opacity: 1 - out, filter: `blur(${out * 10}px)`}}>
+    <OffthreadVideo src={staticFile(SRC[s.src!].v)} muted startFrom={Math.max(0, Math.round(s.at! * 30) - s.dur)} style={{width: '100%', height: '100%', objectFit: 'cover', filter: `grayscale(${1 - out}) blur(${26 * (1 - out)}px) brightness(${0.45 + 0.55 * out})`, transform: `scale(${1.15 - 0.13 * out})`}} />
+    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', padding: '0 80px', opacity: 1 - out, filter: `blur(${out * 12}px)`, transform: `scale(${1 - out * 0.05})`}}>
       <div style={{fontFamily: SF, fontWeight: 600, fontSize: 40, color: WHITE, opacity: .8, marginBottom: 26, letterSpacing: 4, transform: `translateY(${interpolate(f, [0, 10], [10, 0], {...clamp, easing: ease})}px)`}}>СҰРАҚ · 0{n}</div>
       <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0 26px', maxWidth: 940}}>
-        {words.map((w, i) => { const sp = spring({frame: f - 3 - i * 2, fps, config: {damping: 22, stiffness: 120}});
+        {words.map((w, i) => { const sp = spring({frame: f + 8 - i * 2, fps, config: {damping: 22, stiffness: 120}});
           const isRed = s.red && w.replace(/[?—]/g, '').toLowerCase() === s.red.toLowerCase();
           return <span key={i} style={{fontFamily: D, fontSize: words.length > 5 ? 118 : 150, lineHeight: 1.02, color: isRed ? RED : WHITE, textTransform: 'uppercase',
             opacity: Math.min(1, sp * 1.5), filter: `blur(${(1 - sp) * 8}px)`, transform: `translateY(${(1 - sp) * 14}px)`, textShadow: '0 6px 30px rgba(0,0,0,.4)'}}>{w}</span>; })}
@@ -108,7 +108,7 @@ export const Reels2: React.FC = () => {
   const cuts = TL.map(s => s.from);
   return <AbsoluteFill style={{background: 'black'}}><style>{BRAND_CSS}</style>
     {TL.map((s, i) => s.type === 'speak' ? <Sequence key={i} from={s.from} durationInFrames={s.dur}>
-        <Speaker src={SRC[s.src!].v} i={s.in!} dur={s.dur} punch={[Math.round(s.dur * 0.45)]} bw={i === 7 ? [] : []} />
+        <Speaker src={SRC[s.src!].v} i={s.in!} dur={s.dur} punch={[]} />
         <Audio src={staticFile(SRC[s.src!].a)} startFrom={s.in!} /></Sequence>
       : s.type === 'q' ? <Sequence key={i} from={s.from} durationInFrames={s.dur}><Question s={s} n={(i >> 1) + 1} /></Sequence>
       : <Sequence key={i} from={s.from} durationInFrames={s.dur}><FinalCard /></Sequence>)}
@@ -118,9 +118,9 @@ export const Reels2: React.FC = () => {
     <Sequence {...ov(at(s2, 17.6), at(s2, 17.6) + 60)}><BRoll src="office.mp4" start={60} dur={60} /></Sequence>
     <Sequence from={at(s2, 26.4)} durationInFrames={s2.from + s2.dur - at(s2, 26.4)}><BRoll src="px_7989667.mp4" dur={90} /></Sequence>
     {/* proposal */}
-    <Sequence from={at(s3, 50.2)} durationInFrames={s3.from + s3.dur - at(s3, 50.2)}><BRoll src="px_6646796.mp4" dur={90} /></Sequence>
+    <Sequence from={at(s3, 50.2)} durationInFrames={s3.from + s3.dur - at(s3, 50.2)}><BRoll src="pack.mp4" start={200} dur={90} /></Sequence>
     {/* packs UI */}
-    <Sequence from={at(s4, 77.0)} durationInFrames={s4.from + s4.dur - at(s4, 77.0)}><BRoll src="px_8058014.mp4" dur={200} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /><PacksUI dur={s4.from + s4.dur - at(s4, 77.0)} /></Sequence>
+    <Sequence from={at(s4, 77.0)} durationInFrames={s4.from + s4.dur - at(s4, 77.0)}><BRoll src="code.mp4" start={60} dur={200} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} /><PacksUI dur={s4.from + s4.dur - at(s4, 77.0)} /></Sequence>
     {/* strength */}
     <Sequence from={at(s5, 11.6)} durationInFrames={at(s5, 15.4) - at(s5, 11.6)}><BRoll src="px_3256852.mp4" dur={115} /></Sequence>
     <Sequence from={callF} durationInFrames={playF - callF}><BRoll src="am2.mp4" start={600} dur={200} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} /><CallUI dur={playF - callF} /></Sequence>
@@ -129,7 +129,6 @@ export const Reels2: React.FC = () => {
     <Sequence from={s1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
     <Sequence from={s2.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Captions hide={hide} />
-    {[...cuts, at(s2, 17.6), at(s2, 17.6) + 60, at(s2, 26.4), at(s3, 50.2), at(s4, 77.0), at(s5, 11.6), at(s5, 15.4), callF, playF].map((fr, k) => <Sequence key={'f' + k} from={Math.max(0, fr - 1)} durationInFrames={5}><Flash /></Sequence>)}
   </AbsoluteFill>;
 };
 

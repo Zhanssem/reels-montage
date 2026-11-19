@@ -45,7 +45,8 @@ export const Speaker: React.FC<{src: string; i: number; dur: number; bw?: [numbe
 export const BRoll: React.FC<{src: string; start?: number; dur: number; img?: boolean}> = ({src, start = 0, dur, img}) => {
   const f = useCurrentFrame();
   const st: React.CSSProperties = {width: '100%', height: '100%', objectFit: 'cover'};
-  return <AbsoluteFill style={{transform: `scale(${interpolate(f, [0, dur], [1.06, 1.18])})`, filter: `blur(${interpolate(f, [0, 5], [12, 0], clamp)}px)`}}>
+  const {durationInFrames: sd} = useVideoConfig();
+  return <AbsoluteFill style={{transform: `scale(${interpolate(f, [0, dur], [1.04, 1.12])})`, opacity: interpolate(f, [0, 8], [0, 1], clamp)}}>
     {img ? <Img src={staticFile(src)} style={st} /> : <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={st} />}
   </AbsoluteFill>;
 };
