@@ -109,7 +109,7 @@ export const NameTag: React.FC<{name: string; role: string}> = ({name, role}) =>
   const f = useCurrentFrame();
   const e = interpolate(f, [0, 12], [0, 1], {...clamp, easing: Easing.bezier(0.45, 0, 0.2, 1)});
   const o = interpolate(f, [80, 92], [0, 1], clamp);
-  return <AbsoluteFill style={{alignItems: 'flex-start', paddingTop: 170, paddingLeft: 80, opacity: e * (1 - o), filter: `blur(${(1 - e) * 10 + o * 10}px)`}}>
+  return <AbsoluteFill style={{alignItems: 'flex-start', paddingTop: 330, paddingLeft: 80, opacity: e * (1 - o), filter: `blur(${(1 - e) * 10 + o * 10}px)`}}>
     <div style={{fontFamily: D, fontSize: 170, lineHeight: 0.9, color: WHITE, textTransform: 'uppercase', textShadow: '0 6px 30px rgba(0,0,0,.45)', transform: `translateX(${(1 - e) * -40}px)`}}>{name}</div>
     <div style={{marginTop: 18, transform: `translateX(${(1 - e) * -20}px)`}}>
       <span style={{display: 'inline-block', background: RED, color: WHITE, fontFamily: SF, fontWeight: 700, fontSize: 60, padding: '10px 34px', borderRadius: 50}}>{role}</span></div>

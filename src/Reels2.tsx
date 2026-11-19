@@ -35,7 +35,7 @@ const Captions: React.FC<{hide: [number, number][]}> = ({hide}) => {
   let c: [number, number, string] | undefined;
   for (let k = 0; k < CAPS.length; k++) { const nx = CAPS[k + 1]?.[0] ?? CAPS[k][1] + 8; if (f >= CAPS[k][0] && f < Math.min(nx, CAPS[k][1] + 10)) { c = CAPS[k]; break; } }
   if (!c) return null; const w = c[2].replace(/[.,!?«»]/g, ''); if (!w || w === '—') return null; const l = f - c[0];
-  return <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 1100}}>
+  return <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 820}}>
     <div style={{fontFamily: SF, fontWeight: 600, fontSize: 60, color: WHITE, transform: `scale(${interpolate(l, [0, 4], [1.15, 1], clamp)})`, filter: `blur(${interpolate(l, [0, 3], [6, 0], clamp)}px)`, textShadow: '0 4px 18px rgba(0,0,0,.7)'}}>{w}</div></AbsoluteFill>;
 };
 
@@ -60,7 +60,7 @@ const Chip: React.FC<{children: React.ReactNode; at: number; red?: boolean}> = (
 };
 
 const ChipsOverlay: React.FC<{items: [string, number][]}> = ({items}) =>
-  <AbsoluteFill style={{alignItems: 'center', paddingTop: 1560, gap: 14}}>{items.map(([t, at], i) => <Chip key={i} at={at} red={i === items.length - 1}>{t}</Chip>)}</AbsoluteFill>;
+  <AbsoluteFill style={{alignItems: 'center', paddingTop: 1480, gap: 14}}>{items.map(([t, at], i) => <Chip key={i} at={at} red={i === items.length - 1}>{t}</Chip>)}</AbsoluteFill>;
 
 const PacksUI: React.FC<{dur: number}> = ({dur}) => <Card dur={dur}>
   <div style={{fontFamily: SF, fontWeight: 600, fontSize: 34, color: '#999', marginBottom: 18}}>TEZTAP · жаңа пакет</div>
@@ -125,7 +125,7 @@ export const Reels2: React.FC = () => {
     <Sequence from={at(s5, 11.6)} durationInFrames={at(s5, 15.4) - at(s5, 11.6)}><BRoll src="px_3256852.mp4" dur={115} /></Sequence>
     <Sequence from={callF} durationInFrames={playF - callF}><BRoll src="am2.mp4" start={600} dur={200} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} /><CallUI dur={playF - callF} /></Sequence>
     <Sequence {...ov(playF, s5.from + s5.dur)}><SiteMotion dur={s5.from + s5.dur - playF} bg="am2.mp4" bgStart={700} scrollFrom={900} /></Sequence>
-    {titles.map((t, k) => <Sequence key={'t' + k} from={t.from} durationInFrames={t.dur}><Stack top={170} lines={t.lines} out={t.dur - 7} /></Sequence>)}
+    {titles.map((t, k) => <Sequence key={'t' + k} from={t.from} durationInFrames={t.dur}><Stack top={300} lines={t.lines} out={t.dur - 7} /></Sequence>)}
     <Sequence from={s1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
     <Sequence from={s2.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Captions hide={hide} />
