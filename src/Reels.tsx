@@ -2,13 +2,13 @@ import React from 'react';
 import {AbsoluteFill, Sequence, OffthreadVideo, Audio, Img, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Freeze, Easing} from 'remotion';
 import {BRAND_CSS} from './fonts';
 import data from './data.json';
-const RED = '#ED1C24', WHITE = '#FFFFFF';
+export const RED = '#ED1C24', WHITE = '#FFFFFF';
 const T = data.timeline; const seg = (i: number) => T[i];
-const D = 'DrukCond', DT = 'DrukText', SF = 'SF';
-const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+export const D = 'DrukCond', DT = 'DrukText', SF = 'SF';
+export const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
 // Headline: per-letter drop-in with blur, CAPS
-const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; color?: string; font?: string; out?: number}> = ({children, delay = 0, size, color = WHITE, font = D, out}) => {
+export const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; color?: string; font?: string; out?: number}> = ({children, delay = 0, size, color = WHITE, font = D, out}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
   const o = out !== undefined ? interpolate(f, [out, out + 7], [0, 1], clamp) : 0;
   const text = String(children); const isSmall = font === SF;
@@ -23,14 +23,14 @@ const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; c
 };
 
 // lines: [text, size, 'r' red | 'k' small SF kicker]
-const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 640, step = 8, out}) =>
+export const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 640, step = 8, out}) =>
   <AbsoluteFill style={{alignItems: 'center', paddingTop: top}}>
     {lines.map(([t, s, c], i) => <Line key={i} size={c === 'k' ? 52 : s} font={c === 'k' ? SF : D} color={c === 'r' ? RED : WHITE} delay={i * step} out={out}>{t}</Line>)}
   </AbsoluteFill>;
 
 const BW: React.FC<{dur: number}> = ({dur}) => null;
 
-const Speaker: React.FC<{src: string; i: number; dur: number; bw?: [number, number][]; punch?: number[]}> = ({src, i, dur, bw = [], punch = []}) => {
+export const Speaker: React.FC<{src: string; i: number; dur: number; bw?: [number, number][]; punch?: number[]}> = ({src, i, dur, bw = [], punch = []}) => {
   const f = useCurrentFrame();
   const inBw = bw.some(([a, b]) => f >= a && f < b);
   const lastPunch = punch.filter(p => p <= f).length; // alternate framing on each punch
@@ -42,7 +42,7 @@ const Speaker: React.FC<{src: string; i: number; dur: number; bw?: [number, numb
   </AbsoluteFill>;
 };
 
-const BRoll: React.FC<{src: string; start?: number; dur: number; img?: boolean}> = ({src, start = 0, dur, img}) => {
+export const BRoll: React.FC<{src: string; start?: number; dur: number; img?: boolean}> = ({src, start = 0, dur, img}) => {
   const f = useCurrentFrame();
   const st: React.CSSProperties = {width: '100%', height: '100%', objectFit: 'cover'};
   return <AbsoluteFill style={{transform: `scale(${interpolate(f, [0, dur], [1.06, 1.18])})`, filter: `blur(${interpolate(f, [0, 5], [12, 0], clamp)}px)`}}>
@@ -74,10 +74,10 @@ const SiteCards: React.FC<{bg: string; bgStart?: number}> = ({bg, bgStart = 0}) 
     </AbsoluteFill></AbsoluteFill>;
 };
 
-const Flash: React.FC = () => { const f = useCurrentFrame();
+export const Flash: React.FC = () => { const f = useCurrentFrame();
   return <AbsoluteFill style={{background: 'white', opacity: interpolate(f, [0, 1, 4], [0, 0.85, 0], clamp), pointerEvents: 'none'}} />; };
 
-const SiteMotion: React.FC<{dur: number; bg: string; bgStart?: number; scrollFrom?: number}> = ({dur, bg, bgStart = 0, scrollFrom = 0}) => {
+export const SiteMotion: React.FC<{dur: number; bg: string; bgStart?: number; scrollFrom?: number}> = ({dur, bg, bgStart = 0, scrollFrom = 0}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
   const ease = Easing.bezier(0.45, 0, 0.2, 1);
   const enter = interpolate(f, [0, 22], [0, 1], {...clamp, easing: ease});
@@ -104,7 +104,7 @@ const SiteMotion: React.FC<{dur: number; bg: string; bgStart?: number; scrollFro
       </div></AbsoluteFill></AbsoluteFill>;
 };
 
-const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
+export const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
   const f = useCurrentFrame();
   const o = interpolate(f, [80, 90], [1, 0], clamp);
   return <AbsoluteFill style={{alignItems: 'flex-start', paddingTop: 300, paddingLeft: 70, opacity: o}}>
@@ -115,7 +115,7 @@ const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
 };
 
 // one word at a time, SF, blur-in pop — like refs
-const Captions: React.FC<{hide: [number, number][]; accent: string[]}> = ({hide, accent}) => {
+export const Captions: React.FC<{hide: [number, number][]; accent: string[]}> = ({hide, accent}) => {
   const f = useCurrentFrame(); const caps = data.captions as [number, number, string][];
   if (hide.some(([a, b]) => f >= a && f < b)) return null;
   let idx = -1;
@@ -145,7 +145,7 @@ const Stats: React.FC = () => <AbsoluteFill>
     <Counter to={7} delay={0} label="ай" /><Counter to={3} delay={22} label="қала" red /><Counter to={10} delay={44} label="пакет" />
   </AbsoluteFill></AbsoluteFill>;
 
-const Final: React.FC = () => {
+export const Final: React.FC = () => {
   const f = useCurrentFrame();
   return <AbsoluteFill>
     <OffthreadVideo src={staticFile('amanat.mp4')} muted startFrom={950} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(18px) brightness(.4)'}} />
