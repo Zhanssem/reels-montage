@@ -1,0 +1,184 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Caveat:wght@700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#ED1C24}
+#s{position:relative;width:1080px;height:1920px;overflow:hidden;background:#ED1C24}
+.a{position:absolute;left:0;top:0;will-change:transform,opacity}
+.U{font-family:Unbounded;font-weight:900;color:#fff;text-transform:uppercase}
+.stk{text-shadow:0 4px 0 #000,0 8px 0 #fff,0 10px 0 #000,0 14px 0 #fff,0 16px 0 #000,-3px 0 0 #000,3px 0 0 #000,0 -3px 0 #000}
+.cap{width:1080px;text-align:center;font:900 76px/1.08 Unbounded;color:#fff;text-transform:uppercase;text-shadow:0 5px 0 #C82127,0 10px 0 #8d1218}
+.hand{font-family:Caveat;font-weight:700;color:#fff}
+#scr{position:absolute;left:24px;top:24px;width:600px;height:1300px;border-radius:64px;overflow:hidden;background:#fff}
+</style></head><body><div id="s">
+<div class="a" id="rays" style="left:-900px;top:-500px;width:2880px;height:2880px;border-radius:50%;background:repeating-conic-gradient(#ED1C24 0 7.5deg,#d9161e 7.5deg 15deg)"></div>
+<div class="a" id="paper" style="width:1080px;height:1920px;background:#F7F3EC"></div>
+<div class="a" id="burst" style="width:200px;height:200px;border-radius:50%;background:#ED1C24"></div>
+</div>
+<script>
+const S=document.getElementById('s');
+const el=(h,cls='')=>{const d=document.createElement('div');d.className='a '+cls;d.innerHTML=h;S.appendChild(d);return d};
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo=t=>1-Math.pow(1-t,3),eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const back=t=>{const c=1.9;return t<=0?0:1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const elas=t=>t<=0?0:t>=1?1:Math.pow(2,-10*t)*Math.sin((t*10-.75)*2*Math.PI/3)+1;
+const p=(t,a,b)=>cl((t-a)/(b-a));
+const win=(t,a,b,fi=.3,fo=.3)=>Math.min(eo(p(t,a,a+fi)),1-eio(p(t,b-fo,b)));
+const set=(e,x,y,s=1,o=1,r=0,sx=1,sy=1)=>{e.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${s*sx},${s*sy})`;e.style.opacity=o;e.style.visibility=o<=0.001?'hidden':'visible'};
+const $=id=>document.getElementById(id);
+// floating doodles
+const doodles=['?','★','⚡','!','?','★','!','⚡','?','★'].map((c,i)=>{const d=el(`<div style="font:700 ${70+(i%3)*30}px Caveat;color:#fff;opacity:.35">${c}</div>`);d.k=i;return d});
+// SCENE 1 Сүйінші
+const s1=el(`<div class="U stk" style="width:1080px;text-align:center;font-size:150px;letter-spacing:-4px">СҮЙІНШІ!</div>`);
+// SCENE 2 countdown
+const ring=el(`<svg width="560" height="560" viewBox="0 0 560 560"><circle cx="280" cy="280" r="250" fill="none" stroke="#fff" stroke-width="10"/><circle id="rg" cx="280" cy="280" r="250" fill="none" stroke="#E1E31A" stroke-width="22" stroke-linecap="round" stroke-dasharray="1571" transform="rotate(-90 280 280)"/></svg>`);
+const nums=[3,2,1].map(n=>el(`<div class="U stk" style="width:560px;text-align:center;font-size:400px;line-height:560px">${n}</div>`));
+const s2t=el(`<div class="hand" style="width:1080px;text-align:center;font-size:84px">асыға күткен күн келді!</div>`);
+// confetti
+const conf=[...Array(70)].map((_,i)=>{const c=el(`<div style="width:${14+i%3*6}px;height:${24+i%4*6}px;background:${['#E1E31A','#fff','#C82127','#E1E31A'][i%4]};border-radius:3px"></div>`);c.r=[Math.random(),Math.random(),Math.random(),Math.random()];return c});
+// SCENE 3 logo
+const logo=el(`<img src="a/logo.png" style="width:560px">`);
+const onl=el(`<div class="U" style="padding:22px 50px;background:#E1E31A;color:#000;font-size:72px;border:5px solid #000;border-radius:24px;box-shadow:0 10px 0 #000">ЕНДІ ОНЛАЙН!</div>`);
+// PHONE
+const phone=el(`<div style="width:648px;height:1348px;border-radius:88px;background:#111;box-shadow:0 0 0 6px #000,0 50px 0 -10px #8d1218,0 60px 120px #0006;position:relative">
+<div id="scr">
+ <div id="bar" style="position:absolute;left:0;top:0;width:600px;height:150px;background:#f2f2f2;z-index:5;padding:62px 22px 0">
+  <div style="height:70px;border-radius:35px;background:#fff;border:3px solid #ddd;display:flex;align-items:center;padding:0 26px;font:800 30px Manrope;color:#222;gap:12px"><span style="font-size:28px">🔒</span><span id="url"></span><span id="caret" style="width:3px;height:36px;background:#ED1C24"></span></div></div>
+ <div id="pg" style="position:absolute;left:0;top:150px;width:600px;height:1150px;overflow:hidden">
+  <img id="ihome" src="a/home.png" class="a" style="width:600px">
+  <img id="ipkg" src="a/pkg.png" class="a" style="width:600px">
+  <img id="ibuy" src="a/buy.png" class="a" style="width:600px">
+  <img id="ihow" src="a/how.png" class="a" style="width:600px">
+  <div id="load" class="a" style="width:600px;height:8px;background:#ED1C24"></div>
+ </div>
+ <div id="land" class="a" style="width:1300px;height:600px;background:#111;transform-origin:0 0">
+  <img id="L1" src="a/L1.png" class="a" style="width:1300px"><img id="L2" src="a/L2.png" class="a" style="width:1300px"><img id="L3" src="a/L3.png" class="a" style="width:1300px"><img id="L4" src="a/L4.png" class="a" style="width:1300px">
+  <div id="tmr" class="a" style="left:0;top:0;font:900 44px Unbounded;color:#fff"></div>
+ </div>
+</div>
+<div style="position:absolute;left:244px;top:40px;width:160px;height:44px;border-radius:22px;background:#111;z-index:9"></div>
+</div>`);
+const tap=el(`<div style="width:120px;height:120px;border-radius:50%;border:10px solid #E1E31A;margin:-60px 0 0 -60px"></div>`);
+const finger=el(`<div style="font-size:120px;margin:-10px 0 0 -40px;filter:drop-shadow(0 6px 0 #0005)">👆</div>`);
+// captions (top area, safe zone ≥250)
+const caps={};
+const mk=(k,h,cls='cap')=>caps[k]=el(`<div class="${cls}">${h}</div>`);
+mk('c1','КУИЗ <span style="color:#E1E31A">СІЗГЕ</span><br>БАРАДЫ');
+mk('c2','НАҒЫЗ <span style="color:#E1E31A">ҚАЗАҚША</span><br>КУИЗ');
+mk('q1','ҚОНАҚТАРМЕН');mk('q2','ДОСТАРМЕН');mk('q3','ӘРІПТЕСТЕРМЕН');
+mk('c3','ЭКРАНДЫ ҚОС —<br><span style="color:#E1E31A">ОЙНА!</span>');
+mk('c4','ҮШ-АҚ <span style="color:#E1E31A">ҚАДАМ</span>');
+// globe pins
+const cities=['Алматы','Астана','Шымкент','Стамбул','Сеул','Дубай','Лондон','Нью-Йорк'];
+const pins=cities.map((c,i)=>el(`<div style="display:flex;align-items:center;gap:12px;padding:14px 26px 14px 16px;background:#fff;border:4px solid #000;border-radius:40px;box-shadow:0 8px 0 #000;font:800 36px Manrope;color:#000"><span style="width:30px;height:30px;border-radius:50%;background:#ED1C24;border:4px solid #000"></span>${c}</div>`));
+// steps
+const steps=['ТАҢДАЙСЫЗ','ТӨЛЕЙСІЗ','ОЙНАЙСЫЗ'].map((t,i)=>el(`<div style="display:flex;align-items:center;gap:22px"><div style="width:96px;height:96px;border-radius:50%;background:#E1E31A;border:5px solid #000;font:900 54px/86px Unbounded;text-align:center;color:#000;box-shadow:0 7px 0 #000">${i+1}</div><div class="U" style="font-size:54px;text-shadow:0 5px 0 #8d1218">${t}</div></div>`));
+// paid features callouts
+const feats=[['♾️','7 КҮН ШЕКСІЗ'],['📺','КЕЗ КЕЛГЕН ЭКРАН'],['🇰🇿','ҚАЗАҚ ТІЛІНДЕ']].map(([i,t])=>el(`<div style="display:flex;align-items:center;gap:16px;padding:18px 30px 18px 18px;background:#fff;border:5px solid #000;border-radius:30px;box-shadow:0 9px 0 #000"><span style="font-size:52px">${i}</span><span style="font:900 36px Unbounded;color:#000">${t}</span></div>`));
+// gift
+const gift=el(`<div style="width:1080px;text-align:center"><div style="font-size:220px;line-height:1">🎁</div><div class="cap" style="margin-top:10px">АЛҒАШҚЫ ОЙЫН<br><span style="display:inline-block;margin-top:16px;padding:8px 40px;background:#E1E31A;color:#000;border:6px solid #000;border-radius:30px;text-shadow:none;box-shadow:0 10px 0 #000">ТЕГІН!</span></div></div>`);
+// big url bar
+const big=el(`<div style="width:960px;height:170px;border-radius:85px;background:#fff;border:7px solid #000;box-shadow:0 16px 0 #000;display:flex;align-items:center;padding:0 50px;gap:22px;font:800 58px Manrope;color:#000"><span style="font-size:54px">🔒</span><span id="burl"></span><span id="bcar" style="width:5px;height:70px;background:#ED1C24"></span></div>`);
+const go=el(`<div style="padding:34px 90px;border-radius:60px;background:#E1E31A;border:6px solid #000;box-shadow:0 12px 0 #000;font:900 64px Unbounded;color:#000">▶ ОЙНАУ</div>`);
+const bug=el(`<div class="hand" style="width:1080px;text-align:center;font-size:96px">бүгін-ақ бастаңыз!</div>`);
+// final
+const flogo=el(`<img src="a/logo.png" style="width:520px">`);
+const slog=el(`<div class="cap" style="font-size:70px">АҚЫЛ ӘЛЕМДІ<br>ҚҰТҚАРАДЫ</div>`);
+const furl=el(`<div style="width:1080px;text-align:center;font:800 50px Manrope;color:#fff">play.teztap.company</div>`);
+const flash=el(`<div style="width:1080px;height:1920px;background:#fff"></div>`);
+
+const URL='play.teztap.company';
+const D=42.5;
+window.render=t=>{
+ // background
+ $('rays').style.transform=`rotate(${t*12}deg)`;
+ doodles.forEach((d,i)=>set(d,(i*137+60)%1000,((i*311)%1700+80)+Math.sin(t*1.3+i)*40-((t*30)%200)*0,1,1,Math.sin(t*1.7+i)*20));
+ // S1 paper -> burst (0-1.1)
+ const pb=eio(p(t,.05,.6));$('paper').style.opacity=t<.6?1:0;
+ set($('burst'),440,860,pb*22,1);
+ const s1k=back(p(t,.3,.65)),s1o=1-eio(p(t,1.0,1.25));
+ set(s1,0,820,s1k*(1+s1o*0)*(1+(1-s1o)*1.5),s1o*cl(s1k*3),(1-s1k)*-12);
+ // S2 countdown 1.2-3.5
+ const rin=win(t,1.2,3.55,.25,.2);
+ set(ring,260,620,back(p(t,1.2,1.5))*(1-.2*eio(p(t,3.35,3.55))),rin);
+ $('rg').style.strokeDashoffset=1571*(1-eo(p(t,1.25,3.3)));
+ nums.forEach((n,i)=>{const a=1.25+i*.7,k=back(p(t,a,a+.28)),o=1-eio(p(t,a+.55,a+.7));
+   let sx=1,sy=1;if(i==2){const sq=p(t,3.05,3.25);sy=1-.45*Math.sin(sq*Math.PI);sx=1+.3*Math.sin(sq*Math.PI);}
+   set(n,260,620,k*(i==2?1:1+.4*(1-o)),t<a?0:(i==2?1-eio(p(t,3.3,3.45)):o),0,sx,sy)});
+ set(s2t,0,1290,1,win(t,1.4,3.4)*1,0);s2t.style.transform+=` translateY(${(1-eo(p(t,1.4,1.8)))*40}px)`;
+ // confetti bursts at 3.25 and 4.0
+ conf.forEach((c,i)=>{const t0=i<35?3.25:4.05;const u=t-t0;if(u<0||u>1.8){c.style.visibility='hidden';return}
+   const ang=c.r[0]*Math.PI*2,sp=900+c.r[1]*900;const x=540+Math.cos(ang)*sp*u,y=(i<35?900:760)+Math.sin(ang)*sp*u+900*u*u;
+   set(c,x,y,1,1-p(u,1.2,1.8),u*720*(c.r[2]-.5)*2)});
+ // S3 logo 3.4-5.4
+ const lk=elas(p(t,3.45,4.25)),lo=1-eio(p(t,5.2,5.5));
+ set(logo,260,(1-lk)*-900+380,1,t>3.4?lo:0,(1-cl(lk))*-10,1+.08*Math.sin(p(t,3.9,4.1)*Math.PI),1-.1*Math.sin(p(t,3.9,4.1)*Math.PI));
+ const ok=back(p(t,4.1,4.4));set(onl,230,1120,ok*(1+.04*Math.sin(t*9)),t>4.1?lo:0,-4);
+ // PHONE: in 5.3, out etc.
+ let px=216,py=380,ps=.86,pr=0,po=0;
+ if(t>5.3){po=1;const k=eo(p(t,5.3,5.9));py=470+(1-k)*1500;pr=(1-k)*10;}
+ // move phone lower when captions above
+ // landscape rotate 19.2-25.7
+ const rot=eio(p(t,19.3,19.9))-eio(p(t,25.6,26.2));pr+=-90*rot;ps*=1-.13*rot;py+=rot*20;
+ // out at 30.6 for gift, back for site? phone exits 30.6
+ const out=eio(p(t,30.5,30.9));py+=out*1700;
+ set(phone,px,py,ps,po*(1-p(t,30.9,31)),pr);
+ // URL typing 5.9-7.4
+ const nType=Math.floor(cl((t-5.95)/1.3)*URL.length);$('url').textContent=t<7.6?URL.slice(0,nType):'play.teztap.company';
+ $('caret').style.opacity=(t<7.6&&Math.floor(t*4)%2==0)?1:0;
+ const ld=p(t,7.6,8.2);$('load').style.transform=`scaleX(${ld})`;$('load').style.transformOrigin='left';$('load').style.opacity=(ld>0&&ld<1)?1:0;
+ // pages
+ const pageAt=(id,a,b)=>{const img=$(id);img.style.opacity=(t>=a&&t<b)?1:0;return img};
+ const home=pageAt('ihome',7.9,12.4); const sc=600/780;
+ const hY=eio(p(t,9.6,11.6))*1260*sc + eio(p(t,26.2,26.8))*0; home.style.transform=`translateY(${-hY}px)`;
+ $('ihome').style.opacity=((t>=7.9&&t<12.4)||(t>=26.1&&t<27.6))?1:0;
+ if(t>=26.1){$('ihome').style.transform=`translateY(${-(1250+eio(p(t,26.2,27.0))*500)*sc}px)`;}
+ $('ihome').style.filter=t<8.1?`blur(${(1-p(t,7.9,8.1))*8}px)`:'none';
+ const how=pageAt('ihow',12.4,19.3);how.style.transform=`translateY(${-(eio(p(t,12.4,19.0))*2600*sc+700*sc)}px)`;
+ const pkg=pageAt('ipkg',27.6,28.6);pkg.style.transform=`translateY(${-eio(p(t,27.7,28.5))*200*sc}px)`;
+ const buy=pageAt('ibuy',28.6,30.9);buy.style.transform=`translateY(${-eio(p(t,29.4,30.2))*1250*sc}px)`;
+ $('bar').style.opacity=1;
+ // landscape game screens
+ const land=$('land');land.style.opacity=rot>.02?rot:0;land.style.transform=`translate(600px,0px) rotate(90deg)`;
+ ['L1','L2','L3','L4'].forEach((id,i)=>{const a=[19.5,20.8,22.0,23.3][i],b=[20.8,22.0,23.3,26.3][i];const k=eo(p(t,a,a+.3));$(id).style.opacity=(t>=a&&t<b)?1:0;$(id).style.transform=`scale(${1.08-.08*k})`;$(id).style.transformOrigin='center'});
+ // tap / finger
+ let tx=-500,ty=0,tk=0,fo=0;
+ const taps=[[7.45,540,480],[27.45,390,1060],[28.55,690,1010],[30.25,560,1100],[37.6,540,1340]];
+ taps.forEach(([a,x,y])=>{if(t>a-.45&&t<a+.5){tx=x;ty=y;fo=win(t,a-.45,a+.5,.15,.15);tk=p(t,a,a+.4)}});
+ set(finger,tx+(1-fo)*120,ty+(1-fo)*120+(tk>0?0:Math.sin(t*20)*0),1-.15*Math.sin(tk*Math.PI),fo);
+ set(tap,tx,ty,.3+tk*1.6,tk>0?(1-tk):0);
+ // captions
+ const C=(k,a,b,y=230)=>{const o=win(t,a,b,.25,.25);set(caps[k],0,y+(1-eo(p(t,a,a+.35)))*60,back(p(t,a,a+.35))*.15+.85,o)};
+ C('c1',7.6,9.6,200);C('c2',9.7,12.3,200);
+ C('q1',12.6,14.15,250);C('q2',14.15,16.15,250);C('q3',16.15,19.1,250);
+ C('c3',19.9,22.8,230);C('c4',26.0,30.4,190);
+ // pins 22.9-25.7 around landscape phone
+ pins.forEach((pn,i)=>{const a=23.0+i*.22;const k=back(p(t,a,a+.3));const o=1-eio(p(t,25.4,25.8));
+   const pos=[[60,520],[640,600],[90,1300],[620,1380],[40,1560],[600,1620],[320,440],[300,1720]][i];
+   set(pn,pos[0],pos[1]+Math.sin(t*3+i)*8,k,t>a?o:0)});
+ // steps 27.75-30.4 at left side? put below caption
+ // show only current step under phone: stack them at bottom
+ steps.forEach((s,i)=>{const a=[27.75,28.6,29.6][i],nx=[27.75,28.6,29.6,30.5][i+1];const k=back(p(t,a,a+.3));const o=t<a?0:1-eio(p(t,nx-.12,nx));set(s,250,1675+(1-k)*80,k,o)});
+ // paid features callouts during buy 29.0-30.5
+ feats.forEach((f,i)=>{const a=29.0+i*.22;const k=back(p(t,a,a+.3));set(f,[30,440,50][i],[560,860,1160][i],k*.9,t>a?1-eio(p(t,30.35,30.6)):0,[-5,4,-3][i])});
+ // gift 30.8-33.2
+ const gk=elas(p(t,30.8,31.5)),go2=1-eio(p(t,32.9,33.2));set(gift,0,560,gk,t>30.8?go2:0,Math.sin(t*6)*3*(1-p(t,31.5,32)));
+ // big url 33.2-39.5
+ const bk=back(p(t,33.2,33.6)),bo=1-eio(p(t,39.2,39.6));set(big,60,780,bk,t>33.2?bo:0);
+ const n2=Math.floor(cl((t-33.6)/2.2)*URL.length);$('burl').innerHTML=URL.slice(0,n2).replace('teztap','<span style="color:#ED1C24">teztap</span>');
+ $('bcar').style.opacity=Math.floor(t*4)%2==0?1:0;
+ const gk2=back(p(t,36.0,36.35));set(go,280,1080,gk2*(1-.12*Math.sin(p(t,37.6,37.9)*Math.PI))*(1+.03*Math.sin(t*8)),t>36?bo:0);
+ set(bug,0,500,back(p(t,37.0,37.4)),t>37?bo:0,-3);
+ // flash at 37.65 tap
+ flash.style.opacity=t>37.6&&t<38? .0:0;
+ // final 39.5-42.5
+ const fk=elas(p(t,39.5,40.3));set(flogo,280,-(1-fk)*900+360,1,t>39.45?1:0,(1-cl(fk))*8);
+ set(slog,0,1080,back(p(t,40.2,40.6)),t>40.2?1:0);
+ set(furl,0,1340,1,eo(p(t,40.6,41)));
+ // global fade end
+ S.style.filter=`brightness(${1-p(t,42.2,42.5)})`;
+};
+window.D=D;
+window.ready=document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>i.onload=i.onerror=r))));
+render(0);
+</script></body></html>
