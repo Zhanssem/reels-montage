@@ -40,7 +40,7 @@ const Captions: React.FC<{hide: [number, number][]}> = ({hide}) => {
 };
 
 // ref-style white UI card
-const Card: React.FC<{children: React.ReactNode; dur: number; top?: number; h?: number}> = ({children, dur, top = 260, h = 760}) => {
+const Card: React.FC<{children: React.ReactNode; dur: number; top?: number; h?: number}> = ({children, dur, top = 470, h = 760}) => {
   const f = useCurrentFrame();
   const e = interpolate(f, [0, 14], [0, 1], {...clamp, easing: ease}); const o = interpolate(f, [dur - 10, dur], [0, 1], {...clamp, easing: ease});
   return <AbsoluteFill style={{alignItems: 'center', paddingTop: top}}>
