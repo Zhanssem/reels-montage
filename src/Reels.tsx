@@ -58,6 +58,18 @@ const Phone: React.FC<{src: string; start?: number; bg: string; bgStart?: number
       </div></AbsoluteFill></AbsoluteFill>;
 };
 
+const SiteCards: React.FC<{bg: string; bgStart?: number}> = ({bg, bgStart = 0}) => {
+  const f = useCurrentFrame(); const {fps} = useVideoConfig();
+  const pos = [[-250, -330, -8], [250, -300, 7], [-240, 330, 6], [250, 360, -7]];
+  return <AbsoluteFill>
+    <OffthreadVideo src={staticFile(bg)} muted startFrom={bgStart} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(26px) brightness(.4) grayscale(.7)', transform: 'scale(1.2)'}} />
+    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center'}}>
+      {pos.map(([x, y, r], k) => { const s = spring({frame: f - k * 5, fps, config: {damping: 13, stiffness: 150}});
+        return <Img key={k} src={staticFile(`card${k}.png`)} style={{position: 'absolute', width: 450, borderRadius: 34, boxShadow: '0 30px 70px rgba(0,0,0,.6)',
+          transform: `translate(${x * s}px, ${y * s + (1 - s) * 1400}px) rotate(${r * s + Math.sin((f + k * 10) / 18) * 1.5}deg) scale(${0.8 + 0.2 * s})`}} />; })}
+    </AbsoluteFill></AbsoluteFill>;
+};
+
 const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
   const f = useCurrentFrame();
   const o = interpolate(f, [80, 90], [1, 0], clamp);
@@ -94,7 +106,7 @@ const Counter: React.FC<{to: number; delay: number; label: string; red?: boolean
 };
 
 const Stats: React.FC = () => <AbsoluteFill>
-  <OffthreadVideo src={staticFile('pack.mp4')} muted startFrom={150} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(16px) brightness(.45)'}} />
+  <OffthreadVideo src={staticFile('px_6955192.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.45)'}} />
   <AbsoluteFill style={{justifyContent: 'center', gap: 10}}>
     <Counter to={7} delay={0} label="ай" /><Counter to={3} delay={22} label="қала" red /><Counter to={10} delay={44} label="пакет" />
   </AbsoluteFill></AbsoluteFill>;
@@ -111,14 +123,14 @@ const Final: React.FC = () => {
 };
 
 const Hook: React.FC = () => <AbsoluteFill>
-  <Sequence durationInFrames={75}><BRoll src="hall.mp4" dur={75} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /></Sequence>
-  <Sequence from={75}><Phone src="site.mp4" bg="hall.mp4" /></Sequence>
+  <Sequence durationInFrames={75}><BRoll src="px_8058006.mp4" dur={75} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /></Sequence>
+  <Sequence from={75}><Phone src="site.mp4" bg="px_8058006.mp4" bgStart={60} /></Sequence>
   <Sequence durationInFrames={75}><Stack top={640} lines={[['Бізден жиі', 120], ['сұрайтын', 120], ['сұрақтарыңызды', 130, 'r'], ['сатасыздар ма?', 130, 'r']]} step={7} out={66} /></Sequence>
   <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 140}}><Line size={130}>енді — иә!</Line><Line size={130} color={RED} delay={6}>онлайн</Line></AbsoluteFill></Sequence>
 </AbsoluteFill>;
 
 const DanaQ: React.FC = () => <AbsoluteFill>
-  <BRoll src="code.mp4" start={30} dur={84} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} />
+  <BRoll src="px_12893579.mp4" dur={84} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} />
   <Stack top={620} lines={[['Сөйтсем, ол', 130], ['IT-маман', 240, 'r'], ['болып шықты', 130]]} step={8} />
 </AbsoluteFill>;
 
@@ -132,34 +144,35 @@ export const Reels: React.FC = () => {
     {from: at(18.6, a2), dur: 50, lines: [['Атырау', 260, 'r']]},
     {from: at(24.2, a2), dur: 60, lines: [['мамыр', 200], ['2026', 260, 'r']]},
     {from: at(7.5, m1), dur: 40, lines: [['қуандым', 220, 'r']]},
-    {from: at(30.45, m3), dur: 48, lines: [['тек қана', 150], ['қуаныш', 230, 'r']]},
+    {from: at(30.45, m3), dur: 34, lines: [['тек қана', 150], ['қуаныш', 230, 'r']]},
   ];
   const hide: [number, number][] = [[0, a1.from], [seg(2).from, seg(2).from + seg(2).dur], [seg(7).from, 99999], ...titles.map(t => [t.from, t.from + t.dur] as [number, number]),
     [at(0.6, a1) + 54, at(0.6, a1) + 54], [f39, a2.from + a2.dur], [m2.from, m2.from + m2.dur]];
   return <AbsoluteFill style={{background: 'black'}}><style>{BRAND_CSS}</style>
     <Sequence durationInFrames={seg(0).dur}><Hook /></Sequence>
-    <Sequence from={a1.from} durationInFrames={a1.dur}><Speaker src="alt.mp4" i={a1.in} dur={a1.dur} punch={[L(a1, 3.4)]} /><Audio src={staticFile('alt.mp4')} startFrom={a1.in} /></Sequence>
-    <Sequence from={a2.from} durationInFrames={a2.dur}><Speaker src="alt.mp4" i={a2.in} dur={a2.dur} punch={[L(a2, 23.0)]} bw={[[at(24.2, a2) - a2.from, at(24.2, a2) - a2.from + 60]]} /><Audio src={staticFile('alt.mp4')} startFrom={a2.in} /></Sequence>
-    <Sequence from={m1.from} durationInFrames={m1.dur}><Speaker src="amanat.mp4" i={m1.in} dur={m1.dur} punch={[L(m1, 5.2), L(m1, 8.4)]} bw={[[at(7.5, m1) - m1.from, at(7.5, m1) - m1.from + 40]]} /><Audio src={staticFile('amanat.mp4')} startFrom={m1.in} /></Sequence>
-    <Sequence from={m2.from} durationInFrames={m2.dur}><Speaker src="amanat.mp4" i={m2.in} dur={m2.dur} /><Audio src={staticFile('amanat.mp4')} startFrom={m2.in} /></Sequence>
-    <Sequence from={m3.from} durationInFrames={m3.dur}><Speaker src="amanat.mp4" i={m3.in} dur={m3.dur} punch={[L(m3, 32.1)]} bw={[[0, 48]]} /><Audio src={staticFile('amanat.mp4')} startFrom={m3.in} /></Sequence>
+    <Sequence from={a1.from} durationInFrames={a1.dur}><Speaker src="alt.mp4" i={a1.in} dur={a1.dur} punch={[L(a1, 3.4)]} /><Audio src={staticFile('alt_clean.wav')} startFrom={a1.in} /></Sequence>
+    <Sequence from={a2.from} durationInFrames={a2.dur}><Speaker src="alt.mp4" i={a2.in} dur={a2.dur} punch={[L(a2, 23.0)]} bw={[[at(24.2, a2) - a2.from, at(24.2, a2) - a2.from + 60]]} /><Audio src={staticFile('alt_clean.wav')} startFrom={a2.in} /></Sequence>
+    <Sequence from={m1.from} durationInFrames={m1.dur}><Speaker src="amanat.mp4" i={m1.in} dur={m1.dur} punch={[L(m1, 5.2), L(m1, 8.4)]} bw={[[at(7.5, m1) - m1.from, at(7.5, m1) - m1.from + 40]]} /><Audio src={staticFile('amanat_clean.wav')} startFrom={m1.in} /></Sequence>
+    <Sequence from={m2.from} durationInFrames={m2.dur}><Speaker src="amanat.mp4" i={m2.in} dur={m2.dur} /><Audio src={staticFile('amanat_clean.wav')} startFrom={m2.in} /></Sequence>
+    <Sequence from={m3.from} durationInFrames={m3.dur}><Speaker src="amanat.mp4" i={m3.in} dur={m3.dur} punch={[L(m3, 32.1)]} bw={[[0, 48]]} /><Audio src={staticFile('amanat_clean.wav')} startFrom={m3.in} /></Sequence>
     <Sequence from={seg(2).from} durationInFrames={seg(2).dur}><DanaQ /></Sequence>
     {/* B-roll */}
-    <Sequence from={at(2.4, a1)} durationInFrames={130}><BRoll src="players.png" img dur={130} /><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
+    <Sequence from={at(2.4, a1)} durationInFrames={130}><Sequence durationInFrames={65}><BRoll src="px_3189291.mp4" dur={65} /></Sequence><Sequence from={65}><BRoll src="players.png" img dur={65} /></Sequence><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
       <Stack top={300} lines={[['Астана', 170], ['Алматы', 170, 'r']]} /></Sequence>
     <Sequence from={at(17.6, a2)} durationInFrames={95}><BRoll src="office.mp4" start={60} dur={95} /></Sequence>
-    <Sequence from={at(26.6, a2)} durationInFrames={at(29.3, a2) - at(26.6, a2)}><BRoll src="code.mp4" start={120} dur={80} /></Sequence>
+    <Sequence from={at(26.6, a2)} durationInFrames={at(29.3, a2) - at(26.6, a2)}><BRoll src="px_7989667.mp4" dur={80} /></Sequence>
     <Sequence from={f39} durationInFrames={a2.from + a2.dur - f39}>
       <Freeze frame={Math.round(30.15 * 30)}><OffthreadVideo src={staticFile('alt.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.6)', transform: 'scale(1.15)'}} /></Freeze>
       <Stack top={560} lines={[['39', 520, 'r'], ['ойын', 170]]} step={7} /></Sequence>
-    <Sequence from={at(10.0, m1)} durationInFrames={m1.from + m1.dur - at(10.0, m1)}><BRoll src="pack.mp4" start={140} dur={120} /></Sequence>
+    <Sequence from={at(10.0, m1)} durationInFrames={50}><BRoll src="px_6646796.mp4" dur={50} /></Sequence>
+    <Sequence from={at(10.0, m1) + 50} durationInFrames={m1.from + m1.dur - at(10.0, m1) - 50}><BRoll src="pack.mp4" start={190} dur={70} /></Sequence>
     <Sequence from={m2.from} durationInFrames={m2.dur}><Phone src="site.mp4" start={120} bg="amanat.mp4" bgStart={520} />
       <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={140}>қазақ</Line><Line size={140} color={RED} delay={6}>тілінде</Line></AbsoluteFill></Sequence>
-    <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="pack.mp4" start={330} dur={45} /></Sequence>
+    <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="px_8451937.mp4" dur={45} /></Sequence>
+    <Sequence from={at(31.6, m3)} durationInFrames={at(33.0, m3) - at(31.6, m3)}><SiteCards bg="amanat.mp4" bgStart={950} /></Sequence>
     {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={600} lines={t.lines} out={t.dur - 7} /></Sequence>)}
     <Sequence from={a1.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Sequence from={m1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
-    <Audio src={staticFile('music.mp3')} volume={(f) => (f > a1.from + 8 && f < m3.from + m3.dur - 4 && !(f > seg(2).from + 4 && f < seg(2).from + seg(2).dur - 4)) ? 0.12 : 0.55} />
     <Captions hide={hide} accent={['платформ', 'онлайн', 'teztap']} />
     <Sequence from={seg(7).from} durationInFrames={seg(7).dur}><Stats /></Sequence>
     <Sequence from={seg(8).from} durationInFrames={seg(8).dur}><Final /></Sequence>
