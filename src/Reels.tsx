@@ -1,160 +1,167 @@
 import React from 'react';
-import {AbsoluteFill, Sequence, OffthreadVideo, Audio, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Freeze, Img} from 'remotion';
-import {FONT_CSS} from './fonts';
+import {AbsoluteFill, Sequence, OffthreadVideo, Audio, Img, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Freeze, Easing} from 'remotion';
+import {BRAND_CSS} from './fonts';
 import data from './data.json';
-const U = 'Montserrat', C = 'Caveat';
-const RED = '#ED1C24', DARK = '#C82127', YEL = '#E1E31A';
-const T = data.timeline;
-const seg = (i: number) => T[i];
+const RED = '#ED1C24', WHITE = '#FFFFFF';
+const T = data.timeline; const seg = (i: number) => T[i];
+const D = 'DrukCond', DT = 'DrukText', SF = 'SF';
+const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
-const Pop: React.FC<{delay?: number; children: React.ReactNode; style?: React.CSSProperties; from?: 'up' | 'left' | 'scale'}> = ({delay = 0, children, style, from = 'scale'}) => {
+// Line reveal: slides up from a mask with motion blur
+const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; color?: string; font?: string; out?: number}> = ({children, delay = 0, size, color = WHITE, font = D, out}) => {
   const f = useCurrentFrame(); const {fps} = useVideoConfig();
-  const s = spring({frame: f - delay, fps, config: {damping: 11, stiffness: 160}});
-  const tr = from === 'scale' ? `scale(${s})` : from === 'up' ? `translateY(${(1 - s) * 200}px)` : `translateX(${(1 - s) * -1100}px)`;
-  return <div style={{transform: tr, opacity: f < delay ? 0 : 1, ...style}}>{children}</div>;
+  const s = spring({frame: f - delay, fps, config: {damping: 18, stiffness: 190}});
+  const o = out !== undefined ? interpolate(f, [out, out + 6], [0, 1], clamp) : 0;
+  const blur = Math.abs(1 - s) * 18 + o * 14;
+  return <div style={{overflow: 'hidden', padding: '0.08em 10px 0.02em', lineHeight: 0.92, marginTop: '-0.06em'}}>
+    <div style={{fontFamily: font, fontSize: size, color, textTransform: 'uppercase', textAlign: 'center', letterSpacing: font === D ? 1 : 0,
+      transform: `translateY(${(1 - s) * 100 + o * -60}%)`, filter: `blur(${blur}px)`, opacity: f < delay ? 0 : 1 - o,
+      textShadow: '0 6px 30px rgba(0,0,0,.45)'}}>{children}</div></div>;
 };
 
-const BlurBg: React.FC<{src: string; start?: number}> = ({src, start = 0}) =>
-  <AbsoluteFill style={{background: '#111'}}><OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(28px) brightness(.5)', transform: 'scale(1.15)'}} /></AbsoluteFill>;
+const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 560, step = 6, out}) =>
+  <AbsoluteFill style={{alignItems: 'center', paddingTop: top}}>
+    {lines.map(([t, s, c], i) => <Line key={i} size={s} color={c === 'r' ? RED : WHITE} delay={i * step} out={out}>{t}</Line>)}
+  </AbsoluteFill>;
 
-const Rays: React.FC = () => {
+const BW: React.FC<{dur: number}> = ({dur}) => null;
+
+const Speaker: React.FC<{src: string; i: number; dur: number; bw?: [number, number][]; punch?: number[]}> = ({src, i, dur, bw = [], punch = []}) => {
   const f = useCurrentFrame();
-  const rays = Array.from({length: 16}, (_, i) => `${DARK} ${i * 22.5}deg ${i * 22.5 + 11}deg, ${RED} ${i * 22.5 + 11}deg ${(i + 1) * 22.5}deg`).join(',');
-  const icons = ['?', '★', '⚡', '!', '?', '★'];
-  return <AbsoluteFill style={{background: RED, overflow: 'hidden'}}>
-    <div style={{position: 'absolute', left: -900, top: -400, width: 2880, height: 2880, background: `conic-gradient(${rays})`, opacity: 0.55, transform: `rotate(${f * 0.4}deg)`}} />
-    {icons.map((c, i) => <div key={i} style={{position: 'absolute', fontFamily: C, fontSize: 130, color: 'white', opacity: 0.35,
-      left: (i * 173) % 950, top: 200 + ((i * 331 + f * 2) % 1500), transform: `rotate(${Math.sin(f / 20 + i) * 20}deg)`}}>{c}</div>)}
+  const inBw = bw.some(([a, b]) => f >= a && f < b);
+  const lastPunch = punch.filter(p => p <= f).length; // alternate framing on each punch
+  const base = lastPunch % 2 ? 1.22 : 1.04;
+  const pk = punch.filter(p => p <= f).pop();
+  const kick = pk !== undefined ? interpolate(f - pk, [0, 8], [0.06, 0], clamp) : 0;
+  return <AbsoluteFill style={{transform: `scale(${base + kick + interpolate(f, [0, dur], [0, 0.05])})`, transformOrigin: '50% 35%'}}>
+    <OffthreadVideo src={staticFile(src)} muted startFrom={i} style={{width: '100%', height: '100%', objectFit: 'cover', filter: inBw ? 'grayscale(1) contrast(1.15) brightness(.85)' : 'none'}} />
   </AbsoluteFill>;
 };
 
-const Big: React.FC<{children: React.ReactNode; size?: number; color?: string}> = ({children, size = 110, color = 'white'}) =>
-  <div style={{fontFamily: U, fontWeight: 900, fontSize: size, color, textAlign: 'center', lineHeight: 1.05, textTransform: 'uppercase',
-    WebkitTextStroke: '6px black', paintOrder: 'stroke fill', textShadow: `0 12px 0 ${DARK}`}}>{children}</div>;
-
-const Zoom: React.FC<{children: React.ReactNode; dur: number; a?: number; b?: number}> = ({children, dur, a = 1, b = 1.08}) => {
+const BRoll: React.FC<{src: string; start?: number; dur: number; img?: boolean}> = ({src, start = 0, dur, img}) => {
   const f = useCurrentFrame();
-  return <AbsoluteFill style={{transform: `scale(${interpolate(f, [0, dur], [a, b])})`}}>{children}</AbsoluteFill>;
+  const st: React.CSSProperties = {width: '100%', height: '100%', objectFit: 'cover'};
+  return <AbsoluteFill style={{transform: `scale(${interpolate(f, [0, dur], [1.06, 1.18])})`, filter: `blur(${interpolate(f, [0, 5], [12, 0], clamp)}px)`}}>
+    {img ? <Img src={staticFile(src)} style={st} /> : <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={st} />}
+  </AbsoluteFill>;
 };
 
-const Flash: React.FC = () => { const f = useCurrentFrame(); return <AbsoluteFill style={{background: 'white', opacity: interpolate(f, [0, 6], [0.9, 0], {extrapolateRight: 'clamp'})}} />; };
+const Phone: React.FC<{src: string; start?: number; bg: string; bgStart?: number}> = ({src, start = 0, bg, bgStart = 0}) => {
+  const f = useCurrentFrame(); const {fps} = useVideoConfig();
+  const s = spring({frame: f, fps, config: {damping: 16}});
+  return <AbsoluteFill>
+    <AbsoluteFill><OffthreadVideo src={staticFile(bg)} muted startFrom={bgStart} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(.45) grayscale(.6)', transform: 'scale(1.2)'}} /></AbsoluteFill>
+    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 260}}>
+      <div style={{width: 600, height: 1160, borderRadius: 66, border: '12px solid #0d0d0d', overflow: 'hidden', background: 'white', boxShadow: '0 50px 100px rgba(0,0,0,.6)',
+        transform: `translateY(${(1 - s) * 1300}px) rotate(${(1 - s) * -10}deg)`}}>
+        <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+      </div></AbsoluteFill></AbsoluteFill>;
+};
 
 const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
-  const f = useCurrentFrame(); const {fps} = useVideoConfig();
-  const s = spring({frame: f, fps, config: {damping: 14}}); const out = interpolate(f, [100, 115], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  return <div style={{position: 'absolute', left: 60, top: 300, transform: `translateX(${(1 - s + out) * -1000}px)`}}>
-    <div style={{background: RED, color: 'white', fontFamily: U, fontWeight: 800, fontSize: 64, padding: '18px 34px', border: '5px solid black', borderRadius: 18, boxShadow: '10px 10px 0 black'}}>{name}</div>
-    <div style={{display: 'inline-block', marginTop: 14, background: YEL, color: 'black', fontFamily: U, fontWeight: 600, fontSize: 40, padding: '10px 26px', border: '4px solid black', borderRadius: 14}}>{role}</div>
-  </div>;
-};
-
-const Phone: React.FC<{src: string; start?: number; bg?: string; bgStart?: number}> = ({src, start = 0, bg = 'pack.mp4', bgStart = 200}) => {
-  const f = useCurrentFrame(); const {fps} = useVideoConfig();
-  const s = spring({frame: f, fps, config: {damping: 13}});
-  return <AbsoluteFill><BlurBg src={bg} start={bgStart} />
-    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center'}}>
-      <div style={{width: 640, height: 1240, borderRadius: 70, border: '14px solid #111', overflow: 'hidden', background: 'white', boxShadow: '0 40px 90px rgba(0,0,0,.55)',
-        transform: `translateY(${(1 - s) * 1400}px) rotate(${(1 - s) * 18 + Math.sin(f / 25) * 2}deg)`}}>
-        <OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-      </div>
-    </AbsoluteFill></AbsoluteFill>;
-};
-
-// B-roll cut over speaker (visual only)
-const BRoll: React.FC<{src: string; start?: number; label?: string; dur: number}> = ({src, start = 0, label, dur}) =>
-  <AbsoluteFill><Zoom dur={dur}><OffthreadVideo src={staticFile(src)} muted startFrom={start} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></Zoom>
-    {label && <AbsoluteFill style={{justifyContent: 'flex-start', paddingTop: 560}}><Pop delay={4}><Big size={96}>{label}</Big></Pop></AbsoluteFill>}
-  </AbsoluteFill>;
-
-const FreezeStamp: React.FC<{src: string; at: number; text: string; sub: string}> = ({src, at, text, sub}) =>
-  <AbsoluteFill>
-    <Freeze frame={at}><OffthreadVideo src={staticFile(src)} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(0.3) contrast(1.15)'}} /></Freeze>
-    <AbsoluteFill style={{background: 'rgba(237,28,36,.35)'}} /><Flash />
-    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', gap: 20}}>
-      <Pop><Big size={300} color={YEL}>{text}</Big></Pop><Pop delay={6}><Big size={90}>{sub}</Big></Pop>
-    </AbsoluteFill></AbsoluteFill>;
-
-const Speaker: React.FC<{src: string; i: number; dur: number}> = ({src, i, dur}) =>
-  <Zoom dur={dur} a={1.02} b={1.12}><OffthreadVideo src={staticFile(src)} muted startFrom={i} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></Zoom>;
-
-const Captions: React.FC = () => {
-  const f = useCurrentFrame(); const caps = data.captions as [number, number, string][];
-  const idx = caps.findIndex(c => f >= c[0] && f < (caps[caps.indexOf(c) + 1]?.[0] ?? c[1] + 10) && f < c[1] + 12);
-  if (idx < 0) return null;
-  const g = Math.floor(idx / 3) * 3; const group = caps.slice(g, g + 3).filter(c => c[0] - caps[g][0] < 60);
-  const local = f - caps[g][0];
-  return <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 470}}>
-    <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 22px', maxWidth: 920, transform: `scale(${interpolate(local, [0, 5], [0.85, 1], {extrapolateRight: 'clamp'})})`}}>
-      {group.map((c, k) => { const on = g + k === idx; return <span key={k} style={{fontFamily: U, fontWeight: 800, fontSize: 66, color: on ? YEL : 'white', textTransform: 'uppercase',
-        WebkitTextStroke: '10px black', paintOrder: 'stroke fill', transform: on ? 'scale(1.08)' : 'none', display: 'inline-block'}}>{c[2]}</span>; })}
-    </div></AbsoluteFill>;
-};
-
-const Stats: React.FC = () => {
   const f = useCurrentFrame();
-  const n = (to: number, d: number) => Math.round(interpolate(f, [d, d + 18], [0, to], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}));
-  const items: [number, string, number][] = [[7, 'ай', 0], [3, 'қала', 25], [10, 'пакет', 50]];
-  return <AbsoluteFill>
-    <OffthreadVideo src={staticFile('pack.mp4')} muted startFrom={150} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(14px) brightness(.55)'}} />
-    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', gap: 40}}>
-      {items.map(([to, w, d]) => <Pop key={w} delay={d} from="left"><div style={{display: 'flex', alignItems: 'baseline', gap: 30}}>
-        <Big size={260} color={YEL}>{n(to, d)}</Big><Big size={110}>{w}</Big></div></Pop>)}
-    </AbsoluteFill></AbsoluteFill>;
+  const o = interpolate(f, [80, 90], [1, 0], clamp);
+  return <AbsoluteFill style={{alignItems: 'flex-start', paddingTop: 300, paddingLeft: 70, opacity: o}}>
+    <Line size={110} font={D}>{name}</Line>
+    <div style={{marginLeft: 10, marginTop: 8, opacity: interpolate(f, [6, 12], [0, 1], clamp), transform: `translateX(${interpolate(f, [6, 14], [-30, 0], clamp)}px)`}}>
+      <span style={{background: RED, color: WHITE, fontFamily: SF, fontWeight: 600, fontSize: 38, padding: '8px 22px', borderRadius: 40}}>{role}</span></div>
+  </AbsoluteFill>;
 };
 
-const Final: React.FC = () => <AbsoluteFill><BlurBg src="alt.mp4" start={300} />
-  <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', gap: 50, padding: 80}}>
-    <Pop><div style={{fontFamily: U, fontWeight: 900, fontSize: 200, color: 'white', lineHeight: .9, textAlign: 'center', letterSpacing: -4}}>TEZTAP</div></Pop>
-    <Pop delay={10} from="up"><div style={{background: RED, color: 'white', fontFamily: U, fontWeight: 800, fontSize: 84, padding: '14px 44px', borderRadius: 24, textTransform: 'uppercase'}}>енді онлайн</div></Pop>
-    <Pop delay={22} from="up"><div style={{fontFamily: U, fontWeight: 600, fontSize: 52, color: 'white', textAlign: 'center', maxWidth: 850}}>Үздік сұрақтар — сіздің экраныңызда</div></Pop>
-    <Pop delay={34}><div style={{background: 'white', borderRadius: 60, padding: '20px 50px', fontFamily: U, fontWeight: 600, fontSize: 52}}>play.teztap.company</div></Pop>
+// one word at a time, SF, blur-in pop — like refs
+const Captions: React.FC<{hide: [number, number][]; accent: string[]}> = ({hide, accent}) => {
+  const f = useCurrentFrame(); const caps = data.captions as [number, number, string][];
+  if (hide.some(([a, b]) => f >= a && f < b)) return null;
+  let idx = -1;
+  for (let k = 0; k < caps.length; k++) { const nx = caps[k + 1]?.[0] ?? caps[k][1] + 8; if (f >= caps[k][0] && f < Math.min(nx, caps[k][1] + 10)) { idx = k; break; } }
+  if (idx < 0) return null;
+  const c = caps[idx]; const l = f - c[0];
+  const w = c[2].replace(/[.,!?—«»]/g, '');
+  if (!w) return null;
+  const isA = accent.some(a => w.toLowerCase().startsWith(a));
+  return <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 640}}>
+    <div style={{fontFamily: isA ? D : SF, fontWeight: 600, fontSize: isA ? 150 : 64, color: isA ? RED : WHITE, textTransform: isA ? 'uppercase' : 'none',
+      transform: `scale(${interpolate(l, [0, 4], [1.25, 1], clamp)}) translateY(${interpolate(l, [0, 4], [12, 0], clamp)}px)`, filter: `blur(${interpolate(l, [0, 3], [8, 0], clamp)}px)`,
+      textShadow: '0 4px 18px rgba(0,0,0,.7)'}}>{w}</div></AbsoluteFill>;
+};
+
+const Counter: React.FC<{to: number; delay: number; label: string; red?: boolean}> = ({to, delay, label, red}) => {
+  const f = useCurrentFrame();
+  const n = Math.round(interpolate(f, [delay, delay + 16], [0, to], {...clamp, easing: Easing.out(Easing.cubic)}));
+  return <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 24, opacity: f < delay ? 0 : 1, filter: `blur(${interpolate(f, [delay, delay + 5], [14, 0], clamp)}px)`}}>
+    <div style={{fontFamily: D, fontSize: 330, color: red ? RED : WHITE, lineHeight: .85}}>{n}</div>
+    <div style={{fontFamily: D, fontSize: 120, color: red ? WHITE : RED, lineHeight: 1, textTransform: 'uppercase', paddingBottom: 18}}>{label}</div></div>;
+};
+
+const Stats: React.FC = () => <AbsoluteFill>
+  <OffthreadVideo src={staticFile('pack.mp4')} muted startFrom={150} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(16px) brightness(.45)'}} />
+  <AbsoluteFill style={{justifyContent: 'center', gap: 10}}>
+    <Counter to={7} delay={0} label="ай" /><Counter to={3} delay={22} label="қала" red /><Counter to={10} delay={44} label="пакет" />
   </AbsoluteFill></AbsoluteFill>;
+
+const Final: React.FC = () => {
+  const f = useCurrentFrame();
+  return <AbsoluteFill>
+    <OffthreadVideo src={staticFile('amanat.mp4')} muted startFrom={950} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(18px) brightness(.4)'}} />
+    <Stack top={620} lines={[['TEZTAP', 300], ['енді онлайн', 170, 'r']]} step={8} />
+    <AbsoluteFill style={{alignItems: 'center', paddingTop: 1160, gap: 34, opacity: interpolate(f, [24, 34], [0, 1], clamp), filter: `blur(${interpolate(f, [24, 32], [10, 0], clamp)}px)`}}>
+      <div style={{fontFamily: SF, fontWeight: 500, fontSize: 50, color: WHITE, textAlign: 'center', maxWidth: 820}}>Үздік сұрақтар — сіздің экраныңызда</div>
+      <div style={{fontFamily: SF, fontWeight: 600, fontSize: 46, color: WHITE, background: RED, padding: '14px 40px', borderRadius: 50}}>play.teztap.company</div>
+    </AbsoluteFill></AbsoluteFill>;
+};
 
 const Hook: React.FC = () => <AbsoluteFill>
-  <Sequence durationInFrames={75}><Zoom dur={75}><OffthreadVideo src={staticFile('hall.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.6)'}} /></Zoom></Sequence>
-  <Sequence from={75}><Phone src="site.mp4" bg="hall.mp4" bgStart={0} /></Sequence>
-  <AbsoluteFill style={{justifyContent: 'flex-start', alignItems: 'center', paddingTop: 300, gap: 24}}>
-    <Pop delay={4} from="up"><Big size={70}>Бізден жиі сұрайтын:</Big></Pop>
-    <Pop delay={20}><div style={{background: 'white', border: '6px solid black', borderRadius: 40, padding: '28px 40px', boxShadow: '12px 12px 0 black', maxWidth: 900,
-      fontFamily: U, fontWeight: 800, fontSize: 62, textAlign: 'center'}}>«Сұрақтарыңызды <span style={{color: RED}}>сатасыздар ма?</span>»</div></Pop>
-  </AbsoluteFill>
-  <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 440}}>
-    <Sequence from={95} layout="none"><Pop><Big size={84} color={YEL}>Енді — иә! Онлайн.</Big></Pop></Sequence>
-  </AbsoluteFill></AbsoluteFill>;
+  <Sequence durationInFrames={75}><BRoll src="hall.mp4" dur={75} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /></Sequence>
+  <Sequence from={75}><Phone src="site.mp4" bg="hall.mp4" /></Sequence>
+  <Sequence durationInFrames={75}><Stack top={640} lines={[['Бізден жиі', 120], ['сұрайтын', 120], ['сұрақтарыңызды', 130, 'r'], ['сатасыздар ма?', 130, 'r']]} step={7} out={66} /></Sequence>
+  <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 140}}><Line size={130}>енді — иә!</Line><Line size={130} color={RED} delay={6}>онлайн</Line></AbsoluteFill></Sequence>
+</AbsoluteFill>;
 
 const DanaQ: React.FC = () => <AbsoluteFill>
-  <BRoll src="code.mp4" dur={84} start={30} />
-  <AbsoluteFill style={{background: 'rgba(0,0,0,.35)', justifyContent: 'center', alignItems: 'center', padding: 70}}>
-    <Pop><div style={{background: YEL, border: '6px solid black', borderRadius: 40, padding: '40px 46px', boxShadow: '14px 14px 0 black', transform: 'rotate(-3deg)'}}>
-      <div style={{fontFamily: U, fontWeight: 900, fontSize: 76, textAlign: 'center'}}>Сөйтсем, ол IT-маман болып шықты 😄</div></div></Pop>
-  </AbsoluteFill></AbsoluteFill>;
+  <BRoll src="code.mp4" start={30} dur={84} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} />
+  <Stack top={620} lines={[['Сөйтсем, ол', 130], ['IT-маман', 240, 'r'], ['болып шықты', 130]]} step={8} />
+</AbsoluteFill>;
 
 export const Reels: React.FC = () => {
   const at = (sec: number, s: typeof T[0]) => s.from + Math.round(sec * 30) - s.in;
   const a1 = seg(1), a2 = seg(3), m1 = seg(4), m2 = seg(5), m3 = seg(6);
   const f39 = at(30.15, a2);
-  return <AbsoluteFill style={{background: 'black'}}><style>{FONT_CSS}</style>
+  const L = (s: typeof T[0], sec: number) => Math.round(sec * 30) - s.in; // local frame within speaker seq
+  // big title moments over speakers (absolute frames) — captions hidden there
+  const titles: {from: number; dur: number; lines: [string, number, string?][]}[] = [
+    {from: at(18.6, a2), dur: 50, lines: [['Атырау', 260, 'r']]},
+    {from: at(24.2, a2), dur: 60, lines: [['мамыр', 200], ['2026', 260, 'r']]},
+    {from: at(7.5, m1), dur: 40, lines: [['қуандым', 220, 'r']]},
+    {from: at(30.45, m3), dur: 48, lines: [['тек қана', 150], ['қуаныш', 230, 'r']]},
+  ];
+  const hide: [number, number][] = [[0, a1.from], [seg(2).from, seg(2).from + seg(2).dur], [seg(7).from, 99999], ...titles.map(t => [t.from, t.from + t.dur] as [number, number]),
+    [at(0.6, a1) + 54, at(0.6, a1) + 54], [f39, a2.from + a2.dur], [m2.from, m2.from + m2.dur]];
+  return <AbsoluteFill style={{background: 'black'}}><style>{BRAND_CSS}</style>
     <Sequence durationInFrames={seg(0).dur}><Hook /></Sequence>
-    {[a1, a2].map((s, k) => <Sequence key={'a' + k} from={s.from} durationInFrames={s.dur}><Speaker src="alt.mp4" i={s.in} dur={s.dur} /><Audio src={staticFile('alt.mp4')} startFrom={s.in} /></Sequence>)}
-    {[m1, m2, m3].map((s, k) => <Sequence key={'m' + k} from={s.from} durationInFrames={s.dur}><Speaker src="amanat.mp4" i={s.in} dur={s.dur} /><Audio src={staticFile('amanat.mp4')} startFrom={s.in} /></Sequence>)}
+    <Sequence from={a1.from} durationInFrames={a1.dur}><Speaker src="alt.mp4" i={a1.in} dur={a1.dur} punch={[L(a1, 3.4)]} /><Audio src={staticFile('alt.mp4')} startFrom={a1.in} /></Sequence>
+    <Sequence from={a2.from} durationInFrames={a2.dur}><Speaker src="alt.mp4" i={a2.in} dur={a2.dur} punch={[L(a2, 23.0)]} bw={[[at(24.2, a2) - a2.from, at(24.2, a2) - a2.from + 60]]} /><Audio src={staticFile('alt.mp4')} startFrom={a2.in} /></Sequence>
+    <Sequence from={m1.from} durationInFrames={m1.dur}><Speaker src="amanat.mp4" i={m1.in} dur={m1.dur} punch={[L(m1, 5.2), L(m1, 8.4)]} bw={[[at(7.5, m1) - m1.from, at(7.5, m1) - m1.from + 40]]} /><Audio src={staticFile('amanat.mp4')} startFrom={m1.in} /></Sequence>
+    <Sequence from={m2.from} durationInFrames={m2.dur}><Speaker src="amanat.mp4" i={m2.in} dur={m2.dur} /><Audio src={staticFile('amanat.mp4')} startFrom={m2.in} /></Sequence>
+    <Sequence from={m3.from} durationInFrames={m3.dur}><Speaker src="amanat.mp4" i={m3.in} dur={m3.dur} punch={[L(m3, 32.1)]} bw={[[0, 48]]} /><Audio src={staticFile('amanat.mp4')} startFrom={m3.in} /></Sequence>
     <Sequence from={seg(2).from} durationInFrames={seg(2).dur}><DanaQ /></Sequence>
-    {/* B-roll over Altynbek: Astana/Almaty games, Atyrau, coding */}
-    <Sequence from={at(2.4, a1)} durationInFrames={130}><AbsoluteFill><Zoom dur={130} a={1.0} b={1.25}><Img src={staticFile('players.png')} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></Zoom>
-      <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingBottom: 500}}><Pop delay={6}><Big size={96}>Астана · Алматы</Big></Pop></AbsoluteFill></AbsoluteFill></Sequence>
-    <Sequence from={at(18.4, a2)} durationInFrames={70}><BRoll src="office.mp4" start={60} dur={70} label="📍 Атырау" /></Sequence>
-    <Sequence from={at(23.8, a2)} durationInFrames={95}><BRoll src="code.mp4" start={120} dur={95} label="мамыр 2026" /></Sequence>
-    <Sequence from={f39} durationInFrames={a2.from + a2.dur - f39}><FreezeStamp src="alt.mp4" at={Math.round(30.15 * 30)} text="39" sub="ойын" /></Sequence>
-    {/* B-roll over Amanat */}
-    <Sequence from={at(10.0, m1)} durationInFrames={m1.from + m1.dur - at(10.0, m1)}><BRoll src="pack.mp4" start={140} dur={120} label="платформа" /></Sequence>
-    <Sequence from={m2.from + 6} durationInFrames={m2.dur - 6}><Phone src="site.mp4" start={120} /></Sequence>
-    <Sequence from={m2.from + 6} durationInFrames={m2.dur - 6}><AbsoluteFill style={{paddingTop: 260, alignItems: 'center'}}><Pop><Big size={88} color={YEL}>қазақ тілінде!</Big></Pop></AbsoluteFill></Sequence>
-    <Sequence from={at(32.0, m3)} durationInFrames={50}><BRoll src="pack.mp4" start={330} dur={50} /></Sequence>
-    {/* name tags with freeze flash */}
-    <Sequence from={a1.from} durationInFrames={120}><Flash /><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
-    <Sequence from={m1.from} durationInFrames={120}><Flash /><NameTag name="Аманат" role="редактор" /></Sequence>
-    <Audio src={staticFile('music.mp3')} volume={(f) => { const sp = [[seg(1).from, seg(6).from + seg(6).dur]]; const speaking = f > seg(1).from + 8 && f < seg(6).from + seg(6).dur - 4 && !(f > seg(2).from + 4 && f < seg(2).from + seg(2).dur - 4); return speaking ? 0.12 : 0.55; }} />
-    <Captions />
-    <Sequence from={seg(7).from} durationInFrames={seg(7).dur}><Flash /><Stats /></Sequence>
+    {/* B-roll */}
+    <Sequence from={at(2.4, a1)} durationInFrames={130}><BRoll src="players.png" img dur={130} /><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
+      <Stack top={300} lines={[['Астана', 170], ['Алматы', 170, 'r']]} /></Sequence>
+    <Sequence from={at(17.6, a2)} durationInFrames={95}><BRoll src="office.mp4" start={60} dur={95} /></Sequence>
+    <Sequence from={at(26.6, a2)} durationInFrames={at(29.3, a2) - at(26.6, a2)}><BRoll src="code.mp4" start={120} dur={80} /></Sequence>
+    <Sequence from={f39} durationInFrames={a2.from + a2.dur - f39}>
+      <Freeze frame={Math.round(30.15 * 30)}><OffthreadVideo src={staticFile('alt.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.6)', transform: 'scale(1.15)'}} /></Freeze>
+      <Stack top={560} lines={[['39', 520, 'r'], ['ойын', 170]]} step={7} /></Sequence>
+    <Sequence from={at(10.0, m1)} durationInFrames={m1.from + m1.dur - at(10.0, m1)}><BRoll src="pack.mp4" start={140} dur={120} /></Sequence>
+    <Sequence from={m2.from} durationInFrames={m2.dur}><Phone src="site.mp4" start={120} bg="amanat.mp4" bgStart={520} />
+      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={140}>қазақ</Line><Line size={140} color={RED} delay={6}>тілінде</Line></AbsoluteFill></Sequence>
+    <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="pack.mp4" start={330} dur={45} /></Sequence>
+    {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={600} lines={t.lines} out={t.dur - 7} /></Sequence>)}
+    <Sequence from={a1.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
+    <Sequence from={m1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
+    <Audio src={staticFile('music.mp3')} volume={(f) => (f > a1.from + 8 && f < m3.from + m3.dur - 4 && !(f > seg(2).from + 4 && f < seg(2).from + seg(2).dur - 4)) ? 0.12 : 0.55} />
+    <Captions hide={hide} accent={['платформ', 'онлайн', 'teztap']} />
+    <Sequence from={seg(7).from} durationInFrames={seg(7).dur}><Stats /></Sequence>
     <Sequence from={seg(8).from} durationInFrames={seg(8).dur}><Final /></Sequence>
   </AbsoluteFill>;
 };
