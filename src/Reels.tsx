@@ -15,15 +15,15 @@ const Line: React.FC<{children: React.ReactNode; delay?: number; size: number; c
   const chars = Array.from(text);
   return <div style={{lineHeight: 0.92, padding: '0.06em 10px 0', whiteSpace: 'nowrap', textAlign: 'center', opacity: 1 - o, filter: `blur(${o * 12}px)`, transform: `scale(${1 + o * 0.06})`}}>
     {chars.map((ch, i) => { const d = delay + i * (isSmall ? 0.6 : 1.6);
-      const s = spring({frame: f - d, fps, config: {damping: 14, stiffness: 210}});
+      const s = spring({frame: f - d, fps, config: {damping: 22, stiffness: 120}});
       return <span key={i} style={{display: 'inline-block', fontFamily: font, fontWeight: isSmall ? 500 : 400, fontSize: size, color, textTransform: isSmall ? 'none' : 'uppercase',
-        transform: `translateY(${(1 - s) * -0.55}em) scale(${0.6 + 0.4 * s})`, filter: `blur(${(1 - s) * 10}px)`, opacity: f < d ? 0 : Math.min(1, s * 1.4),
+        transform: `translateY(${(1 - s) * 0.12}em) scale(${0.92 + 0.08 * s})`, filter: `blur(${(1 - s) * 8}px)`, opacity: f < d ? 0 : Math.min(1, s * 1.4),
         textShadow: '0 6px 30px rgba(0,0,0,.5)', whiteSpace: 'pre'}}>{ch}</span>; })}
   </div>;
 };
 
 // lines: [text, size, 'r' red | 'k' small SF kicker]
-const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 560, step = 8, out}) =>
+const Stack: React.FC<{lines: [string, number, string?][]; top?: number; step?: number; out?: number}> = ({lines, top = 640, step = 8, out}) =>
   <AbsoluteFill style={{alignItems: 'center', paddingTop: top}}>
     {lines.map(([t, s, c], i) => <Line key={i} size={c === 'k' ? 52 : s} font={c === 'k' ? SF : D} color={c === 'r' ? RED : WHITE} delay={i * step} out={out}>{t}</Line>)}
   </AbsoluteFill>;
@@ -77,6 +77,33 @@ const SiteCards: React.FC<{bg: string; bgStart?: number}> = ({bg, bgStart = 0}) 
 const Flash: React.FC = () => { const f = useCurrentFrame();
   return <AbsoluteFill style={{background: 'white', opacity: interpolate(f, [0, 1, 4], [0, 0.85, 0], clamp), pointerEvents: 'none'}} />; };
 
+const SiteMotion: React.FC<{dur: number; bg: string; bgStart?: number; scrollFrom?: number}> = ({dur, bg, bgStart = 0, scrollFrom = 0}) => {
+  const f = useCurrentFrame(); const {fps} = useVideoConfig();
+  const ease = Easing.bezier(0.45, 0, 0.2, 1);
+  const enter = interpolate(f, [0, 22], [0, 1], {...clamp, easing: ease});
+  const ry = interpolate(f, [0, dur], [-24, 14], {...clamp, easing: ease});
+  const rx = interpolate(f, [0, dur], [10, 4], clamp);
+  const scroll = interpolate(f, [8, dur], [scrollFrom, scrollFrom + 1500], {...clamp, easing: ease});
+  const cards = [[-330, -120, 0], [330, 80, 1], [-300, 420, 3]];
+  const tapT = Math.max(0, dur - 34);
+  const tap = interpolate(f, [tapT, tapT + 8, tapT + 18], [0, 1, 0], clamp);
+  return <AbsoluteFill>
+    <OffthreadVideo src={staticFile(bg)} muted startFrom={bgStart} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(30px) brightness(.4) grayscale(.6)', transform: 'scale(1.2)'}} />
+    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', paddingTop: 300, perspective: 1600}}>
+      <div style={{position: 'relative', width: 560, height: 1100, transformStyle: 'preserve-3d',
+        transform: `translateY(${(1 - enter) * 900}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${0.85 + 0.15 * enter})`, opacity: enter}}>
+        <div style={{position: 'absolute', inset: 0, borderRadius: 64, border: '12px solid #0d0d0d', overflow: 'hidden', background: 'white', boxShadow: '0 60px 120px rgba(0,0,0,.6)'}}>
+          <Img src={staticFile('site_top.png')} style={{width: '100%', transform: `translateY(${-scroll * (536 / 1080)}px)`}} />
+          <div style={{position: 'absolute', left: '50%', top: '62%', width: 120, height: 120, marginLeft: -60, borderRadius: 60, border: `6px solid ${RED}`,
+            transform: `scale(${0.4 + tap * 0.9})`, opacity: tap, background: 'rgba(237,28,36,.18)'}} />
+        </div>
+        {cards.map(([x, y, k], i) => { const s = spring({frame: f - 18 - i * 7, fps, config: {damping: 20, stiffness: 90}});
+          const fl = Math.sin((f + i * 20) / 22) * 10;
+          return <Img key={i} src={staticFile(`card${k}.png`)} style={{position: 'absolute', left: 140, top: 300, width: 300, borderRadius: 26, boxShadow: '0 30px 60px rgba(0,0,0,.55)',
+            transform: `translate3d(${x * s}px, ${y * s + fl}px, ${160 * s}px) rotate(${(i % 2 ? 6 : -6) * s}deg) scale(${0.5 + 0.5 * s})`, opacity: Math.min(1, s * 1.5)}} />; })}
+      </div></AbsoluteFill></AbsoluteFill>;
+};
+
 const NameTag: React.FC<{name: string; role: string}> = ({name, role}) => {
   const f = useCurrentFrame();
   const o = interpolate(f, [80, 90], [1, 0], clamp);
@@ -122,7 +149,7 @@ const Final: React.FC = () => {
   const f = useCurrentFrame();
   return <AbsoluteFill>
     <OffthreadVideo src={staticFile('amanat.mp4')} muted startFrom={950} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(18px) brightness(.4)'}} />
-    <Stack top={620} lines={[['енді', 0, 'k'], ['TEZTAP', 300], ['ОНЛАЙН', 220, 'r']]} step={10} />
+    <Stack top={640} lines={[['енді', 0, 'k'], ['TEZTAP', 300], ['ОНЛАЙН', 220, 'r']]} step={10} />
     <AbsoluteFill style={{alignItems: 'center', paddingTop: 1160, gap: 34, opacity: interpolate(f, [24, 34], [0, 1], clamp), filter: `blur(${interpolate(f, [24, 32], [10, 0], clamp)}px)`}}>
       <div style={{fontFamily: SF, fontWeight: 500, fontSize: 50, color: WHITE, textAlign: 'center', maxWidth: 820}}>Үздік сұрақтар — сіздің экраныңызда</div>
       <div style={{fontFamily: SF, fontWeight: 600, fontSize: 46, color: WHITE, background: RED, padding: '14px 40px', borderRadius: 50}}>play.teztap.company</div>
@@ -131,14 +158,14 @@ const Final: React.FC = () => {
 
 const Hook: React.FC = () => <AbsoluteFill>
   <Sequence durationInFrames={75}><BRoll src="px_8058006.mp4" dur={75} /><AbsoluteFill style={{background: 'rgba(0,0,0,.45)'}} /></Sequence>
-  <Sequence from={75}><Phone src="site.mp4" bg="px_8058006.mp4" bgStart={60} /></Sequence>
+  <Sequence from={75}><SiteMotion dur={105} bg="px_8058006.mp4" bgStart={60} /></Sequence>
   <Sequence durationInFrames={75}><Stack top={640} lines={[['бізден жиі сұрайтын:', 0, 'k'], ['СҰРАҚТАРЫҢЫЗДЫ', 150], ['САТАСЫЗДАР МА?', 165, 'r']]} step={9} out={66} /></Sequence>
-  <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 140}}><Line size={52} font={SF}>енді — иә!</Line><Line size={170} color={RED} delay={8}>ОНЛАЙН</Line></AbsoluteFill></Sequence>
+  <Sequence from={75}><AbsoluteFill style={{alignItems: 'center', paddingTop: 190}}><Line size={52} font={SF}>енді — иә!</Line><Line size={170} color={RED} delay={8}>ОНЛАЙН</Line></AbsoluteFill></Sequence>
 </AbsoluteFill>;
 
 const DanaQ: React.FC = () => <AbsoluteFill>
   <BRoll src="px_12893579.mp4" dur={84} /><AbsoluteFill style={{background: 'rgba(0,0,0,.5)'}} />
-  <Stack top={620} lines={[['сөйтсем, ол', 0, 'k'], ['IT-МАМАН', 270, 'r'], ['болып шықты', 0, 'k']]} step={10} />
+  <Stack top={640} lines={[['сөйтсем, ол', 0, 'k'], ['IT-МАМАН', 270, 'r'], ['болып шықты', 0, 'k']]} step={10} />
 </AbsoluteFill>;
 
 export const Reels: React.FC = () => {
@@ -165,19 +192,19 @@ export const Reels: React.FC = () => {
     <Sequence from={seg(2).from} durationInFrames={seg(2).dur}><DanaQ /></Sequence>
     {/* B-roll */}
     <Sequence from={at(2.4, a1)} durationInFrames={130}><Sequence durationInFrames={65}><BRoll src="px_3256852.mp4" dur={65} /></Sequence><Sequence from={65}><BRoll src="px_5847919.mp4" dur={65} /></Sequence><AbsoluteFill style={{background: 'rgba(0,0,0,.25)'}} />
-      <Stack top={300} lines={[['біз ойнайтынбыз', 0, 'k'], ['АСТАНА', 190], ['АЛМАТЫ', 190, 'r']]} /></Sequence>
+      <Stack top={640} lines={[['біз ойнайтынбыз', 0, 'k'], ['АСТАНА', 190], ['АЛМАТЫ', 190, 'r']]} /></Sequence>
     <Sequence from={at(17.6, a2)} durationInFrames={95}><BRoll src="office.mp4" start={60} dur={95} /></Sequence>
     <Sequence from={at(26.6, a2)} durationInFrames={at(29.3, a2) - at(26.6, a2)}><BRoll src="px_7989667.mp4" dur={80} /></Sequence>
     <Sequence from={f39} durationInFrames={a2.from + a2.dur - f39}>
       <Freeze frame={Math.round(30.15 * 30)}><OffthreadVideo src={staticFile('alt.mp4')} muted style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) blur(10px) brightness(.6)', transform: 'scale(1.15)'}} /></Freeze>
-      <Stack top={560} lines={[['кеше өткіздік', 0, 'k'], ['39', 520, 'r'], ['ОЙЫН', 170]]} step={8} /></Sequence>
+      <Stack top={640} lines={[['кеше өткіздік', 0, 'k'], ['39', 520, 'r'], ['ОЙЫН', 170]]} step={8} /></Sequence>
     <Sequence from={at(10.0, m1)} durationInFrames={50}><BRoll src="px_6646796.mp4" dur={50} /></Sequence>
     <Sequence from={at(10.0, m1) + 50} durationInFrames={m1.from + m1.dur - at(10.0, m1) - 50}><BRoll src="pack.mp4" start={190} dur={70} /></Sequence>
-    <Sequence from={m2.from} durationInFrames={m2.dur}><Phone src="site.mp4" start={120} bg="amanat.mp4" bgStart={520} />
-      <AbsoluteFill style={{alignItems: 'center', paddingTop: 120}}><Line size={52} font={SF}>енді</Line><div style={{display: 'flex', gap: 24}}><Line size={130} delay={8}>ҚАЗАҚ</Line><Line size={130} color={RED} delay={16}>ТІЛІНДЕ</Line></div></AbsoluteFill></Sequence>
+    <Sequence from={m2.from} durationInFrames={m2.dur}><SiteMotion dur={m2.dur} bg="amanat.mp4" bgStart={520} scrollFrom={900} />
+      <AbsoluteFill style={{alignItems: 'center', paddingTop: 190}}><Line size={52} font={SF}>енді</Line><div style={{display: 'flex', gap: 24}}><Line size={130} delay={8}>ҚАЗАҚ</Line><Line size={130} color={RED} delay={16}>ТІЛІНДЕ</Line></div></AbsoluteFill></Sequence>
     <Sequence from={at(33.0, m3)} durationInFrames={45}><BRoll src="px_8451937.mp4" dur={45} /></Sequence>
     <Sequence from={at(31.6, m3)} durationInFrames={at(33.0, m3) - at(31.6, m3)}><BRoll src="px_8058014.mp4" dur={42} /></Sequence>
-    {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={600} lines={t.lines} out={t.dur - 7} /></Sequence>)}
+    {titles.map((t, k) => <Sequence key={k} from={t.from} durationInFrames={t.dur}><Stack top={640} lines={t.lines} out={t.dur - 7} /></Sequence>)}
     <Sequence from={a1.from} durationInFrames={92}><NameTag name="Алтынбек" role="әзірлеуші · Атырау" /></Sequence>
     <Sequence from={m1.from} durationInFrames={92}><NameTag name="Аманат" role="редактор" /></Sequence>
     <Captions hide={hide} accent={['платформ', 'онлайн', 'teztap']} />
