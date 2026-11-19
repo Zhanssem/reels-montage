@@ -99,7 +99,7 @@ export const Reels2: React.FC = () => {
   const hide: [number, number][] = TL.filter(s => s.type !== 'speak').map(s => [s.from, s.from + s.dur] as [number, number]);
   const ov = (from: number, to: number) => { hide.push([from, to]); return {from, durationInFrames: to - from}; };
   const titles: {from: number; dur: number; lines: [string, number, string?][]}[] = [
-    {from: at(s2, 18.6), dur: 48, lines: [['біздің қала', 0, 'k'], ['АТЫРАУ', 240, 'r']]},
+    {from: s2.from + 96, dur: 48, lines: [['біздің қала', 0, 'k'], ['АТЫРАУ', 240, 'r']]},
     {from: at(s2, 24.2), dur: 55, lines: [['бастадық', 0, 'k'], ['МАМЫР 2026', 200, 'r']]},
     {from: at(s3, 47.0), dur: 40, lines: [['әрине', 0, 'k'], ['ҚУАНДЫМ', 220, 'r']]},
   ];
